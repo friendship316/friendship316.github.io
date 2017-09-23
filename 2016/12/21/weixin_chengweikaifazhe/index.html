@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>微信java开发系列 一、认证成为开发者 | xiake</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已失去链接，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，希望能对刚开始微信开发的朋友们有参考作用。    微信双向认证的过程就是两台服务器打招呼的过程，就好像我们接下来要一起做事，那么我们需要首先打个招呼，彼此知道对方在哪里一样。  一、准备工作 需要一个自己的服务器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信java开发系列 一、认证成为开发者">
+<meta property="og:url" content="http://yoursite.com/2016/12/21/weixin_chengweikaifazhe/index.html">
+<meta property="og:site_name" content="xiake">
+<meta property="og:description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已失去链接，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，希望能对刚开始微信开发的朋友们有参考作用。    微信双向认证的过程就是两台服务器打招呼的过程，就好像我们接下来要一起做事，那么我们需要首先打个招呼，彼此知道对方在哪里一样。  一、准备工作 需要一个自己的服务器">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-61634847ea907b3c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-3beee7a6e7b2d8d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-3735133eb7e31b18.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2016-12-24T12:05:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微信java开发系列 一、认证成为开发者">
+<meta name="twitter:description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已失去链接，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，希望能对刚开始微信开发的朋友们有参考作用。    微信双向认证的过程就是两台服务器打招呼的过程，就好像我们接下来要一起做事，那么我们需要首先打个招呼，彼此知道对方在哪里一样。  一、准备工作 需要一个自己的服务器">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3727888-61634847ea907b3c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="xiake" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">xiake</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">go go go</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-weixin_chengweikaifazhe" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/21/weixin_chengweikaifazhe/" class="article-date">
+  <time datetime="2016-12-21T10:13:52.000Z" itemprop="datePublished">2016-12-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      微信java开发系列 一、认证成为开发者
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>声明：本文的操作过程参考了很多网络资源，但由于记录时已失去链接，因此无法贴出。</li>
+<li>因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，希望能对刚开始微信开发的朋友们有参考作用。</li>
+</ul>
+<hr>
+<ul>
+<li>微信双向认证的过程就是两台服务器打招呼的过程，就好像我们接下来要一起做事，那么我们需要首先打个招呼，彼此知道对方在哪里一样。</li>
+</ul>
+<h2 id="一、准备工作"><a href="#一、准备工作" class="headerlink" title="一、准备工作"></a>一、准备工作</h2><ol>
+<li><strong>需要一个自己的服务器资源和域名。</strong>我是搭建“科学上网”环境的时候自己买的一个VPS，并在上面搭建的nginx和tomcat，相关教程网络上资源很多。如果个人没有服务器资源的话，可以使用像BAE这类的应用引擎，相关资源请百度或者谷歌一下，本文默认您拥有自己的服务器资源并且已经搭建好web服务环境。 </li>
+<li><strong>登录微信公众平台并注册账号，申请一个订阅号或者服务号。</strong>个人只能选择订阅号，订阅号和服务号的区别是服务号拥有更多的接口调用权限。如果你拥有申请服务号的资格，那么直接申请服务号即可。如果你只是自己学习开发，那么就申请订阅号，我们可以在自己的订阅号里面申请一个测试号，测试号拥有全部的接口调用权限，完全可以满足开发者学习。本文默认申请的是订阅号。</li>
+</ol>
+<h2 id="二、认证成为开发者"><a href="#二、认证成为开发者" class="headerlink" title="二、认证成为开发者"></a>二、认证成为开发者</h2><h4 id="一-、了解相关参数以及申请测试号"><a href="#一-、了解相关参数以及申请测试号" class="headerlink" title="(一)、了解相关参数以及申请测试号"></a>(一)、了解相关参数以及申请测试号</h4><ul>
+<li><strong>熟悉微信开发配置参数</strong>。注册并申请订阅号之后，进入个人页面，选择开发→基本配置，可以看到相关配置。<ol>
+<li>开发者ID（包括AppID和AppSecret）。这里简单说一下这两个参数，调用微信接口的时候需要使用这两个参数获取一个access_token，有了这个access_token，相当于我们才拥有了使用微信接口的权限。我们每次调用微信接口都需要传过去我们的access_token以供微信服务器验证。</li>
+<li>除了开发者ID以外，我们还能看见服务器配置选项，点击修改配置，会进入填写自己的服务器信息界面。有三个参数：<ul>
+<li>URL——你的服务器上接收微信消息的Servlet的路径（到方法）。相当于Struts2的Action路径（到方法），相当于SpringMVC的Controller的路径（到方法）。比如我使用的SpringMVC，URL是<a href="http://www.xxxx.com/web工程名/weixin/test.do" target="_blank" rel="external">http://www.xxxx.com/web工程名/weixin/test.do</a> ，这里还有一点是URL可以以http和https开头，分别支持80端口和443端口。如果使用的是http开头，那么你的服务器上面的web服务端口应该是80。如果以https开头，那么你的服务器上面的web服务端口应该是443。</li>
+<li>Token——用于验证的参数。由用户自定义。</li>
+<li>EncodingAESKey——用于加解密的字符串，如果我们选择EncodingAESKey参数下方的消息加解密方式为安全模式，那么我们接收到的微信发送过来的消息是经过加密的，同时我们发送给微信服务器的消息也应该加密，加解密的示例在<a href="https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&amp;t=resource/res_list&amp;verify=1&amp;id=open1419318479&amp;token=&amp;lang=zh_CN" target="_blank" rel="external">微信开放平台的资源中心</a>有源代码可供下载（包括c++, php, java, python, c# 5种语言的示例代码）。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><strong>申请测试号</strong>，为了拥有全部接口调用权限，我们可以申请一个测试号。在微信公众平台的个人页面选择开发下面的开发者工具，选择公众平台测试账号，进入申请测试号的管理页面之后，我们可以看到同样有appID和appsecret，同时也有接口配置信息，这些参数和上文提到的同名参数作用是一致的，即测试号也是一个公众号，只不过测试号有最多允许100个用户关注，以及名字无法自定义等限制，而且没有消息加解密功能。如下图：<br><img src="http://upload-images.jianshu.io/upload_images/3727888-61634847ea907b3c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="测试号管理界面"></li>
+</ul>
+<h4 id="二-、双向认证"><a href="#二-、双向认证" class="headerlink" title="(二)、双向认证"></a>(二)、双向认证</h4><ul>
+<li>啰嗦了半天，终于可以步入正题了。我们需要完成双向认证才能进行开发，此处相当于微信服务器需要发送一条消息在我们自己的服务器上，我们自己的服务器接收消息之后，首先确认这条消息是否是微信发送（这相当于我们自己的服务器验证微信，当然其实如果仅仅是想要微信服务器认证我们——单向认证，也可以不需要这一步），如果是，我们再原样返回微信发送的echostr参数（随机字符串），这样微信服务器接收消息之后，就认证了我这台服务器。  双向认证完成，就可以开始开发了。 </li>
+<li>为此，我们需要创建一个web工程写一个Servlet服务接收微信服务器的请求，如果使用框架，即是SpringMVC的Controller，Struts2的Action，我使用的是SpringMVC，为了便于熟悉流程，将所有用到的东西都放在一个类中。没有进行分解，封装工具类等等，本文使用的是JDK1.8，注释详细，基本都能看懂。</li>
+</ul>
+<p>代码会说话：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div></pre></td><td class="code"><pre><div class="line">package my.controller;</div><div class="line"></div><div class="line">import java.io.IOException;</div><div class="line">import java.io.PrintWriter;</div><div class="line">import java.security.MessageDigest;</div><div class="line">import java.security.NoSuchAlgorithmException;</div><div class="line">import java.util.Arrays;</div><div class="line">import javax.servlet.http.HttpServletRequest;</div><div class="line">import javax.servlet.http.HttpServletResponse;</div><div class="line">import org.apache.log4j.Logger;</div><div class="line">import org.springframework.stereotype.Controller;</div><div class="line">import org.springframework.web.bind.annotation.RequestMapping;</div><div class="line">@Controller</div><div class="line">@RequestMapping(&quot;/weixin&quot;)</div><div class="line">public class GetWeixinController &#123;</div><div class="line">	</div><div class="line">	private static Logger logger = Logger.getLogger(GetWeixinController.class);</div><div class="line">	</div><div class="line">	@RequestMapping(&quot;/test&quot;)</div><div class="line">	public void connect(HttpServletRequest request,HttpServletResponse response)&#123;</div><div class="line">		logger.info(&quot;接入成功&quot;);</div><div class="line">		String token = &quot;lifasen&quot;;//在开发者的测试号管理页面填写的token</div><div class="line">		</div><div class="line">		//获取请求中的参数，由于测试号没有加解密功能，所以此处并不需要解密，直接获取</div><div class="line">		String timestamp = request.getParameter(&quot;timestamp&quot;);</div><div class="line">		String nonce = request.getParameter(&quot;nonce&quot;);</div><div class="line">		String weixinSignature = request.getParameter(&quot;signature&quot;);</div><div class="line">		String echostr = request.getParameter(&quot;echostr&quot;);</div><div class="line">		logger.info(&quot;参数：token:&quot;+token+&quot;,timestamp:&quot;+timestamp+&quot;,nonce:&quot;+nonce+&quot;,signature:&quot;+weixinSignature);</div><div class="line">		</div><div class="line">		//对参数进行字典序排序</div><div class="line">		String[] para = &#123;token,timestamp,nonce&#125;;</div><div class="line">		Arrays.sort(para);</div><div class="line">		</div><div class="line">		//排序之后转换成字符串</div><div class="line">		String paraString = &quot;&quot;;</div><div class="line">		for(int i=0;i&lt;para.length;i++)&#123;</div><div class="line">			paraString += para[i];</div><div class="line">		&#125;</div><div class="line">		logger.info(&quot;排序结果：&quot;+paraString);</div><div class="line">		</div><div class="line">		//sha1加密工具(java.security.MessageDigest)</div><div class="line">		MessageDigest messageDigest = null;	</div><div class="line">		try &#123;</div><div class="line">			//获取加密工具对象</div><div class="line">			messageDigest = MessageDigest.getInstance(&quot;SHA-1&quot;);</div><div class="line">			//加密并转换为16进制字符串，byteToStr方法详细内容见下方</div><div class="line">			String mySignature = byteToStr(messageDigest.digest(paraString.getBytes()));</div><div class="line">			if(mySignature.equals(weixinSignature.toUpperCase()))&#123;</div><div class="line">				logger.info(&quot;==========验证成功============&quot;);</div><div class="line">				//原样返回微信服务器发送的echostr参数，同样，不需要加密</div><div class="line">				PrintWriter out = response.getWriter();</div><div class="line">				out.print(echostr);</div><div class="line">				logger.info(&quot;==========写出返回值成功============&quot;);</div><div class="line">			&#125;</div><div class="line">		&#125; catch (IOException e) &#123;</div><div class="line">			logger.error(&quot;获取输出流失败&quot;, e);</div><div class="line">		&#125; catch (NoSuchAlgorithmException e) &#123;</div><div class="line">			logger.error(&quot;获取加密工具对象失败&quot;,e);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	/**</div><div class="line">	 * 将字节转换为十六进制字符串 </div><div class="line">	 * @param mByte</div><div class="line">	 * @return</div><div class="line">	 */</div><div class="line">	private static String byteToHexStr(byte mByte) &#123;  </div><div class="line">        char[] Digit = &#123; &apos;0&apos;, &apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;, &apos;5&apos;, &apos;6&apos;, &apos;7&apos;, &apos;8&apos;, &apos;9&apos;, &apos;A&apos;, &apos;B&apos;, &apos;C&apos;, &apos;D&apos;, &apos;E&apos;, &apos;F&apos; &#125;;  </div><div class="line">        char[] tempArr = new char[2];  </div><div class="line">        tempArr[0] = Digit[(mByte &gt;&gt;&gt; 4) &amp; 0X0F];  </div><div class="line">        tempArr[1] = Digit[mByte &amp; 0X0F];  </div><div class="line">        String s = new String(tempArr);  </div><div class="line">        return s;  </div><div class="line"></div><div class="line">    &#125;  </div><div class="line">	/**</div><div class="line">	 * 将字节数组转换为十六进制字符串</div><div class="line">	 * @param byteArray</div><div class="line">	 * @return</div><div class="line">	 */</div><div class="line">	private static String byteToStr(byte[] byteArray) &#123;  </div><div class="line"></div><div class="line">	        String strDigest = &quot;&quot;;  </div><div class="line">	        for (int i = 0; i &lt; byteArray.length; i++) &#123;  </div><div class="line">	            strDigest += byteToHexStr(byteArray[i]);  </div><div class="line">	        &#125;  </div><div class="line">	        return strDigest;  </div><div class="line"></div><div class="line">	    &#125;  </div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>至此，将工程打包，部署，在我们的服务器上启动tomcat，然后在测试号管理界面填写并点击提交，可以看见测试号管理界面提示配置成功，此时我们的服务器和微信服务器的双向认证成功，可以开始开发了。</li>
+</ul>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-3beee7a6e7b2d8d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="测试号管理界面"><br><img src="http://upload-images.jianshu.io/upload_images/3727888-3735133eb7e31b18.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tomcat后台"></p>
+<ul>
+<li>如果配置失败，请详细查看tomcat错误日志，排查错误，比如访问路径不对等等。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/12/21/weixin_chengweikaifazhe/" data-id="cj7x37wqr0005grjdswcgibhh" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/12/24/weixin_jieshoubinghuifuwenbenxiaoxi/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          微信Java开发系列 二、接收并回复文本消息
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/06/my-new-post/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">maven项目导入实践：打war包与私服搭建</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/22/xuniji2/">《深入理解Java虚拟机》读书笔记（2）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/08/19/xuniji1/">《深入理解Java虚拟机》读书笔记（1）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/SOAP/">基于SOAP的webservice（1）、JAX-WS实现</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/maxSubArray/">求一个数组中最大的子数组之和以及起终点</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/Springdingshiqi/">Java定时器，Spring定时器极其部署方式</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 xiake<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

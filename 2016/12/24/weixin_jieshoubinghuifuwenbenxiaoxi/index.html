@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>微信Java开发系列 二、接收并回复文本消息 | xiake</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已记不清参考的哪些资源，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，可能有些内容比较啰嗦，但希望能对刚开始微信开发的朋友们有参考作用，感谢每一位点击的朋友，我们一起进步。   功能简介 被动回复消息功能，即用户向公众号发送消息，公众号进行自动回复的功能。实际的过程是用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信Java开发系列 二、接收并回复文本消息">
+<meta property="og:url" content="http://yoursite.com/2016/12/24/weixin_jieshoubinghuifuwenbenxiaoxi/index.html">
+<meta property="og:site_name" content="xiake">
+<meta property="og:description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已记不清参考的哪些资源，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，可能有些内容比较啰嗦，但希望能对刚开始微信开发的朋友们有参考作用，感谢每一位点击的朋友，我们一起进步。   功能简介 被动回复消息功能，即用户向公众号发送消息，公众号进行自动回复的功能。实际的过程是用">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-e8c4c013bdf9db9d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-e153db10dccb31fd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-99c607195c17fd29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2017-05-21T14:52:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微信Java开发系列 二、接收并回复文本消息">
+<meta name="twitter:description" content="声明：本文的操作过程参考了很多网络资源，但由于记录时已记不清参考的哪些资源，因此无法贴出。 因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，可能有些内容比较啰嗦，但希望能对刚开始微信开发的朋友们有参考作用，感谢每一位点击的朋友，我们一起进步。   功能简介 被动回复消息功能，即用户向公众号发送消息，公众号进行自动回复的功能。实际的过程是用">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3727888-e8c4c013bdf9db9d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="xiake" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">xiake</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">go go go</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-weixin_jieshoubinghuifuwenbenxiaoxi" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/24/weixin_jieshoubinghuifuwenbenxiaoxi/" class="article-date">
+  <time datetime="2016-12-24T11:42:06.000Z" itemprop="datePublished">2016-12-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      微信Java开发系列 二、接收并回复文本消息
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>声明：本文的操作过程参考了很多网络资源，但由于记录时已记不清参考的哪些资源，因此无法贴出。</li>
+<li>因为业务需求，学习微信开发，网上很多资源对我来说可能不够细节，于是我把我做过的和想到的有用的东西记录于此，可能有些内容比较啰嗦，但希望能对刚开始微信开发的朋友们有参考作用，感谢每一位点击的朋友，我们一起进步。</li>
+</ul>
+<hr>
+<h2 id="功能简介"><a href="#功能简介" class="headerlink" title="功能简介"></a>功能简介</h2><ul>
+<li>被动回复消息功能，即用户向公众号发送消息，公众号进行自动回复的功能。实际的过程是用户发送消息到微信，微信服务器接收之后，由于我们配置并认证了自己的服务器，于是微信会发送一个请求到我们配置的服务器上，同时会以XML格式传递一系列参数，开发者通过解析XML来获取用户的消息内容。然后需要以<a href="https://mp.weixin.qq.com/wiki" target="_blank" rel="external">微信开发者文档</a>规定的格式构造并发送回复内容到微信服务器。</li>
+<li>这里需要说明的是，用户给公众号发送的消息会有很多种类型，目前微信公众号支持的消息类型有：文本消息、图片消息、语音消息、视频消息、小视频消息、地理位置消息、链接消息。对于不同的消息类型，微信服务器发送给我们的对应的XML数据包的格式会略有不同。</li>
+<li>同样，我们被动回复给用户也可以回复不同类型的消息，针对不同的消息需要构造的XML数据包的格式也有所不同。</li>
+<li>更多详情请见<a href="https://mp.weixin.qq.com/wiki" target="_blank" rel="external">微信开发者文档</a>→消息管理。</li>
+</ul>
+<h2 id="开始开发"><a href="#开始开发" class="headerlink" title="开始开发"></a>开始开发</h2><ul>
+<li>我的上一篇文章<a href="http://www.jianshu.com/p/7deaddd39a92" target="_blank" rel="external">微信java开发系列 一、认证成为开发者</a>中是写了一个servlet来接收微信服务器发送给我们的消息，并将其访问路径配置为微信公众号中的服务器配置的URL参数。在本文的接收消息的时候，我们依旧需要这个URL参数。认证成为开发者之后，在以后的接收消息的时候就不再需要认证了，我们可以选择将那一个servlet的路径注释掉，或者干脆将其中的代码挪至其他地方保存。</li>
+<li>这里我们新建一个servlet，其访问路径就是我们在微信公众号中配置的URL。首先以接收文字消息以及回复文字消息为例。其XML数据包格式如下：<br><img src="http://upload-images.jianshu.io/upload_images/3727888-e8c4c013bdf9db9d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="接收到的文本消息的XML数据包格式"></li>
+</ul>
+<ol>
+<li><p>我们首先需要做的是解析XML，为了流程清晰，这里简单的封装一下，把解析XML数据包封装成一个方法（工具类WeixinUtils）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * 解析微信请求并读取XML</span></div><div class="line"><span class="comment"> * <span class="doctag">@param</span> request</span></div><div class="line"><span class="comment"> * <span class="doctag">@return</span></span></div><div class="line"><span class="comment"> * <span class="doctag">@throws</span> IOException</span></div><div class="line"><span class="comment"> * <span class="doctag">@throws</span> DocumentException</span></div><div class="line"><span class="comment"> */</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Map&lt;String,String&gt; <span class="title">readWeixinXml</span><span class="params">(HttpServletRequest request)</span> <span class="keyword">throws</span> IOException, DocumentException</span>&#123;</div><div class="line">	Map&lt;String,String&gt; map = <span class="keyword">new</span> HashMap&lt;String,String&gt;();</div><div class="line">	<span class="comment">//获取输入流</span></div><div class="line">	InputStream input = request.getInputStream();</div><div class="line">	<span class="comment">//使用dom4j的SAXReader读取（org.dom4j.io.SAXReader;）</span></div><div class="line">	SAXReader sax = <span class="keyword">new</span> SAXReader();</div><div class="line">	Document doc = sax.read(input);</div><div class="line">	<span class="comment">//获取XML数据包根元素</span></div><div class="line">	Element root = doc.getRootElement();</div><div class="line">	<span class="comment">//得到根元素的所有子节点</span></div><div class="line">	<span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">	List&lt;Element&gt; elementList = root.elements();</div><div class="line">	<span class="comment">//遍历所有节点并将其放进map</span></div><div class="line">	<span class="keyword">for</span>(Element e : elementList)&#123;</div><div class="line">		map.put(e.getName(), e.getText());</div><div class="line">	&#125;</div><div class="line">	<span class="comment">//释放资源</span></div><div class="line">	input.close();</div><div class="line">	input = <span class="keyword">null</span>;</div><div class="line">	<span class="keyword">return</span> map;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>获取内容并回复文本内容。</p>
+<pre><code class="java"><span class="keyword">package</span> my.controller;
+<span class="keyword">import</span> java.io.IOException;
+<span class="keyword">import</span> java.io.PrintWriter;
+<span class="keyword">import</span> java.util.Map;
+<span class="keyword">import</span> javax.servlet.http.HttpServletRequest;
+<span class="keyword">import</span> javax.servlet.http.HttpServletResponse;
+<span class="keyword">import</span> org.apache.log4j.Logger;
+<span class="keyword">import</span> org.dom4j.DocumentException;
+<span class="keyword">import</span> org.springframework.stereotype.Controller;
+<span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;
+<span class="keyword">import</span> my.Util.WeixinUtils;
+<span class="meta">@Controller</span>
+<span class="meta">@RequestMapping</span>(<span class="string">"/weixin"</span>)
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WeixinMessage</span> </span>{
+ <span class="keyword">private</span> Logger log = Logger.getLogger(WeixinMessage.class);
+ <span class="meta">@RequestMapping</span>(<span class="string">"/test"</span>)
+ <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">replyTextMessage</span><span class="params">(HttpServletRequest request,HttpServletResponse response)</span></span>{
+     Map&lt;String,String&gt; map = <span class="keyword">null</span>;
+     <span class="comment">//从工具类中获取XML解析之后的map</span>
+     <span class="keyword">try</span> {
+         map =  WeixinUtils.readWeixinXml(request);
+     } <span class="keyword">catch</span> (IOException e) {
+         log.error(<span class="string">"获取输入流失败"</span>, e);
+     } <span class="keyword">catch</span> (DocumentException e) {
+         log.error(<span class="string">"读取XML失败"</span>, e);
+     }
+     <span class="comment">//获取发送方账号</span>
+     String fromUserName = map.get(<span class="string">"FromUserName"</span>);
+     <span class="comment">//接收方账号(开发者微信号)</span>
+     String toUserName = map.get(<span class="string">"ToUserName"</span>);
+     <span class="comment">//消息类型</span>
+     String msgType = map.get(<span class="string">"MsgType"</span>);
+     <span class="comment">//文本内容</span>
+     String content = map.get(<span class="string">"Content"</span>);
+     log.info(<span class="string">"发送方账号:"</span>+fromUserName+<span class="string">",接收方账号(开发者微信号):"</span>+toUserName+<span class="string">",消息类型:"</span>+msgType+<span class="string">",文本内容:"</span>+content);
+     <span class="comment">//回复消息</span>
+     <span class="keyword">if</span>(msgType.equals(<span class="string">"text"</span>)){
+         <span class="comment">//根据开发文档要求构造XML字符串，本文为了让流程更加清晰，直接拼接</span>
+         <span class="comment">//这里在开发的时候可以优化，将回复的文本内容构造成一个java类</span>
+         <span class="comment">//然后使用XStream(com.thoughtworks.xstream.XStream)将java类转换成XML字符串，后面将会使用这个方法。</span>
+         <span class="comment">//而且由于参数中没有任何特殊字符，为简单起见，没有添加&lt;![CDATA[xxxxx]]&gt;</span>
+         String replyMsg = <span class="string">"&lt;xml&gt;"</span>+
+                             <span class="string">"&lt;ToUserName&gt;"</span>+fromUserName+<span class="string">"&lt;/ToUserName&gt;"</span>+
+                             <span class="string">"&lt;FromUserName&gt;"</span>+toUserName+<span class="string">"&lt;/FromUserName&gt;"</span>+
+                             <span class="string">"&lt;CreateTime&gt;"</span>+System.currentTimeMillis()/<span class="number">1000</span>+<span class="string">"&lt;/CreateTime&gt;"</span>+
+                             <span class="string">"&lt;MsgType&gt;"</span>+msgType+<span class="string">"&lt;/MsgType&gt;"</span>+
+                             <span class="string">"&lt;Content&gt;"</span>+content+<span class="string">"&lt;/Content&gt;"</span>+
+                          <span class="string">"&lt;/xml&gt;"</span>;
+         <span class="comment">//响应消息</span>
+         log.info(<span class="string">"响应消息："</span>+replyMsg);
+         PrintWriter out = <span class="keyword">null</span>;
+         <span class="keyword">try</span> {
+             <span class="comment">//设置回复内容编码方式为UTF-8，防止乱码</span>
+             response.setCharacterEncoding(<span class="string">"UTF-8"</span>);
+             out = response.getWriter();
+             <span class="comment">//我们这里将用户发送的消息原样返回</span>
+             out.print(replyMsg);
+             log.info(<span class="string">"==============响应成功=================="</span>);
+         } <span class="keyword">catch</span> (IOException e) {
+             log.error(<span class="string">"获取输出流失败"</span>,e);
+         }<span class="keyword">finally</span> {
+             <span class="keyword">if</span>(out != <span class="keyword">null</span>){
+                 out.close();
+                 out = <span class="keyword">null</span>;
+             }
+         }
+     }
+ }
+}
+</code></pre>
+</li>
+<li>打包，部署，向自己的测试号发送消息，可看到如下：</li>
+</ol>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-e153db10dccb31fd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="接收并回复文本消息"><br><img src="http://upload-images.jianshu.io/upload_images/3727888-99c607195c17fd29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tomcat后台记录"></p>
+<ul>
+<li>到此，接收消息回复消息的功能就完成了，本文只是记录大概的后台流程，并没有涉及过多的细节，我们如果要回复其他类型的消息，只需要构造其他类型的XML字符串即可，需要注意的是<strong>“图片消息”和“图文消息”两者对应的XML格式不同</strong>。另外，本文没有排除重复消息，所以没有使用MsgId这个参数，如果两次消息的MsgId一样，那么就是重复发送的同一条消息。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/12/24/weixin_jieshoubinghuifuwenbenxiaoxi/" data-id="cj7x37wqu0006grjdwj8r8mea" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/01/09/Springdingshiqi/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Java定时器，Spring定时器极其部署方式
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/12/21/weixin_chengweikaifazhe/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">微信java开发系列 一、认证成为开发者</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/22/xuniji2/">《深入理解Java虚拟机》读书笔记（2）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/08/19/xuniji1/">《深入理解Java虚拟机》读书笔记（1）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/SOAP/">基于SOAP的webservice（1）、JAX-WS实现</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/maxSubArray/">求一个数组中最大的子数组之和以及起终点</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/Springdingshiqi/">Java定时器，Spring定时器极其部署方式</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 xiake<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

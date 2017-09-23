@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>求一个数组中最大的子数组之和以及起终点 | xiake</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="求一个数组中最大的子数组之和以及起终点">
+<meta property="og:url" content="http://yoursite.com/2017/05/14/maxSubArray/index.html">
+<meta property="og:site_name" content="xiake">
+<meta property="og:description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-05-21T14:50:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="求一个数组中最大的子数组之和以及起终点">
+<meta name="twitter:description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
+  
+    <link rel="alternate" href="/atom.xml" title="xiake" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">xiake</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">go go go</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-maxSubArray" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/14/maxSubArray/" class="article-date">
+  <time datetime="2017-05-14T10:25:22.000Z" itemprop="datePublished">2017-05-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      求一个数组中最大的子数组之和以及起终点
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。</li>
+</ul>
+<h4 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h4><p> Find the contiguous subarray within an array (containing at least one number) which has the largest sum.<br>For example, given the array [-2,1,-3,4,-1,2,1,-5,4],<br>the contiguous subarray [4,-1,2,1] has the largest sum = 6.<br>简单而言就是找出一个正负数都有的数组中最大的子数组之和。</p>
+<h4 id="分析解答"><a href="#分析解答" class="headerlink" title="分析解答"></a>分析解答</h4><ol>
+<li>看到这个题，首先想到的一个最简单但是时间复杂度最高的方法就是，把这个数组的所有子数组的和都求出来，一个一个比较，取最大值。<br>假设数组的长度为n，那么以它的每个元素的下标i（i从0开始）为子数组起点，都有n-i个子数组，所以所有的子数组个数是<br>n+n-1+n-2+n-3+…+4+3+2+1<br>=(n+1)+(n-1+2)+(n-2+3)+…<br>=(n/2)(n+1)<br>所以时间复杂度为O（n²）；</li>
+<li>动态规划（复杂度为O(n)）。对于数组中第i个元素来说，设curSum为nums[i]之前的累加和最大值，如果这个最大值<0，那么加上nums[i]之后必然会使累加和变小。即cursum+nums[i]<nums[i]，所以此时应该丢掉之前的累加和，从nums[i]重新开始累加。反之，cursum+nums[i]>nums[i]，必定会使和变大（即便nums[i]为负数）。这样，每循环一个元素，都能保证去掉拖后腿的累加和。只要不拖后腿，能多加一个正数，肯定是有利于累加和的增大。从这些累加中比较出值大的累加和即可。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">public static int maxSubArray(int[] nums)&#123;</div><div class="line">		int curSum = nums[0];//curSum为nums[i]之前的累加和最大值</div><div class="line">		int maxSum = nums[0];//最大累加和</div><div class="line">		int curBegin = 0;//当前累加和起点</div><div class="line">		int maxBegin = 0;//最大累加和起点</div><div class="line">		int maxEnd = 0;//最大累加和终点</div><div class="line">		for(int i=1;i&lt;nums.length;i++)&#123;</div><div class="line">			if(curSum&gt;0)&#123;</div><div class="line">				//如果之前的累加和&gt;0，加上nums[i]元素</div><div class="line">				curSum += nums[i];</div><div class="line">			&#125;else&#123;</div><div class="line">				//否则，以nums[i]为起点重新开始</div><div class="line">				curSum = nums[i];</div><div class="line">				curBegin = i;</div><div class="line">			&#125;</div><div class="line">			//如果当前累加和&gt;记录的累加和，赋值。并将当前累加和的起终点记录下来</div><div class="line">			if(curSum &gt; maxSum)&#123;</div><div class="line">				maxSum = curSum;</div><div class="line">				maxBegin = curBegin;</div><div class="line">				maxEnd = i;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		System.out.println(&quot;起点:&quot;+maxBegin+&quot;,终点:&quot;+maxEnd);</div><div class="line">		return maxSum;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></0，那么加上nums[i]之后必然会使累加和变小。即cursum+nums[i]<nums[i]，所以此时应该丢掉之前的累加和，从nums[i]重新开始累加。反之，cursum+nums[i]></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/05/14/maxSubArray/" data-id="cj7x37wqo0003grjduvyqzpk2" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/05/14/SOAP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          基于SOAP的webservice（1）、JAX-WS实现
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/01/09/Springdingshiqi/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Java定时器，Spring定时器极其部署方式</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/22/xuniji2/">《深入理解Java虚拟机》读书笔记（2）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/08/19/xuniji1/">《深入理解Java虚拟机》读书笔记（1）</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/SOAP/">基于SOAP的webservice（1）、JAX-WS实现</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/14/maxSubArray/">求一个数组中最大的子数组之和以及起终点</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/Springdingshiqi/">Java定时器，Spring定时器极其部署方式</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 xiake<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
