@@ -89,16 +89,16 @@
 
 <meta name="description" content="线程池作为Java中一个重要的知识点，看了很多文章，在此以Java自带的线程池为例，记录分析一下。本文参考了Java并发编程：线程池的使用、Java线程池—addWorker方法解析、线程池、ThreadPoolExecutor中策略的选择与工作队列的选择（java线程池）和ThreadPoolExecutor线程池解析与BlockingQueue的三种实现。本文基于JDK1.8实现用例和源码分析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="《深入理解Java虚拟机》读书笔记（2）">
+<meta property="og:title" content="Java线程池带图详解">
 <meta property="og:url" content="http://yoursite.com/2017/09/25/ThreadPoolExecutor/index.html">
 <meta property="og:site_name" content="xiake">
 <meta property="og:description" content="线程池作为Java中一个重要的知识点，看了很多文章，在此以Java自带的线程池为例，记录分析一下。本文参考了Java并发编程：线程池的使用、Java线程池—addWorker方法解析、线程池、ThreadPoolExecutor中策略的选择与工作队列的选择（java线程池）和ThreadPoolExecutor线程池解析与BlockingQueue的三种实现。本文基于JDK1.8实现用例和源码分析">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://owrjz8s8v.bkt.clouddn.com/ThreadPoolExecutor.png">
 <meta property="og:image" content="http://owrjz8s8v.bkt.clouddn.com/ThreadPoolliucheng.jpg">
-<meta property="og:updated_time" content="2017-09-24T16:16:57.000Z">
+<meta property="og:updated_time" content="2017-09-24T16:23:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="《深入理解Java虚拟机》读书笔记（2）">
+<meta name="twitter:title" content="Java线程池带图详解">
 <meta name="twitter:description" content="线程池作为Java中一个重要的知识点，看了很多文章，在此以Java自带的线程池为例，记录分析一下。本文参考了Java并发编程：线程池的使用、Java线程池—addWorker方法解析、线程池、ThreadPoolExecutor中策略的选择与工作队列的选择（java线程池）和ThreadPoolExecutor线程池解析与BlockingQueue的三种实现。本文基于JDK1.8实现用例和源码分析">
 <meta name="twitter:image" content="http://owrjz8s8v.bkt.clouddn.com/ThreadPoolExecutor.png">
 
@@ -134,7 +134,7 @@
 
 
 
-  <title> 《深入理解Java虚拟机》读书笔记（2） | xiake </title>
+  <title> Java线程池带图详解 | xiake </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -274,7 +274,7 @@
             
             
               
-                《深入理解Java虚拟机》读书笔记（2）
+                Java线程池带图详解
               
             
           </h1>
