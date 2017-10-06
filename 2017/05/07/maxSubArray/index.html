@@ -87,27 +87,17 @@
 
 
 
-<meta name="description" content="动机：1、新手上路，想把公司的maven项目导入到家里另一台不能连公司私服的电脑上。 2、想了解公司使用的nexus私服，于是尝试了搭建过程。 所用环境：本文所用eclipse为mars1版本，并配置了最新maven 3.3.9版本插件，Win10系统。 分析：将公司的maven项目导入家里电脑上有两种方式： 1、将公司的项目打成war包然后导入即可，方式简单，但是每次都要copy大量的jar包。">
+<meta name="description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
 <meta property="og:type" content="article">
-<meta property="og:title" content="maven摸索记录">
-<meta property="og:url" content="http://yoursite.com/2016/03/06/mavenNote/index.html">
+<meta property="og:title" content="求一个数组中最大的子数组之和以及起终点">
+<meta property="og:url" content="http://yoursite.com/2017/05/07/maxSubArray/index.html">
 <meta property="og:site_name" content="xiake">
-<meta property="og:description" content="动机：1、新手上路，想把公司的maven项目导入到家里另一台不能连公司私服的电脑上。 2、想了解公司使用的nexus私服，于是尝试了搭建过程。 所用环境：本文所用eclipse为mars1版本，并配置了最新maven 3.3.9版本插件，Win10系统。 分析：将公司的maven项目导入家里电脑上有两种方式： 1、将公司的项目打成war包然后导入即可，方式简单，但是每次都要copy大量的jar包。">
+<meta property="og:description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/mavenwarStep1.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/mavenwarStep2.jpg">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep1.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep2.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep3.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep4.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusrelation.jpg">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexusadd.png">
-<meta property="og:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/nexushost.png">
-<meta property="og:updated_time" content="2017-09-23T13:45:03.000Z">
+<meta property="og:updated_time" content="2017-10-06T04:15:47.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="maven摸索记录">
-<meta name="twitter:description" content="动机：1、新手上路，想把公司的maven项目导入到家里另一台不能连公司私服的电脑上。 2、想了解公司使用的nexus私服，于是尝试了搭建过程。 所用环境：本文所用eclipse为mars1版本，并配置了最新maven 3.3.9版本插件，Win10系统。 分析：将公司的maven项目导入家里电脑上有两种方式： 1、将公司的项目打成war包然后导入即可，方式简单，但是每次都要copy大量的jar包。">
-<meta name="twitter:image" content="http://7xrt1z.com1.z0.glb.clouddn.com/mavenwarStep1.png">
+<meta name="twitter:title" content="求一个数组中最大的子数组之和以及起终点">
+<meta name="twitter:description" content="在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。  题目描述 Find the contiguous subarray within an array (containing at least one number) which has the largest sum.For example, given the array [-2,1,-">
 
 
 
@@ -135,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/03/06/mavenNote/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/05/07/maxSubArray/"/>
 
 
 
 
 
-  <title> maven摸索记录 | xiake </title>
+  <title> 求一个数组中最大的子数组之和以及起终点 | xiake </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -260,7 +250,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/06/mavenNote/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/07/maxSubArray/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xiake">
@@ -281,7 +271,7 @@
             
             
               
-                maven摸索记录
+                求一个数组中最大的子数组之和以及起终点
               
             
           </h1>
@@ -296,8 +286,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-06T17:30:32+08:00">
-                2016-03-06
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-07T17:30:32+08:00">
+                2017-05-07
               </time>
             
 
@@ -332,22 +322,14 @@
       
 
       
-        <h3 id="动机："><a href="#动机：" class="headerlink" title="动机："></a>动机：</h3><pre><code>1、新手上路，想把公司的maven项目导入到家里另一台不能连公司私服的电脑上。
-2、想了解公司使用的nexus私服，于是尝试了搭建过程。
-</code></pre><h3 id="所用环境："><a href="#所用环境：" class="headerlink" title="所用环境："></a>所用环境：</h3><pre><code>本文所用eclipse为mars1版本，并配置了最新maven 3.3.9版本插件，Win10系统。
-</code></pre><h3 id="分析："><a href="#分析：" class="headerlink" title="分析："></a>分析：</h3><pre><code>将公司的maven项目导入家里电脑上有两种方式：
-1、将公司的项目打成war包然后导入即可，方式简单，但是每次都要copy大量的jar包。
-2、在家里电脑上搭建nexus私服，首次部署需要将公司电脑里面的maven的仓库repository文件夹连同项目一起copy。
-</code></pre><h3 id="方式1-打war包步骤："><a href="#方式1-打war包步骤：" class="headerlink" title="方式1 打war包步骤："></a>方式1 打war包步骤：</h3><pre><code>(1)、在eclipse项目上右键选择run as，选择Maven build...
-</code></pre><p><img src="http://7xrt1z.com1.z0.glb.clouddn.com/mavenwarStep1.png" alt=""><br>    (2)、输入clean package命令，点击run。<br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/mavenwarStep2.jpg" alt=""><br>    (3)、在eclipse的工作区间中，项目文件夹下的target文件夹下会生成-项目名.war文件，复制这个文件。<br>    (4)、在家里eclipse上导入war包，file→import→war file→Browse选择war包所在位置即可。</p>
-<h3 id="方式2-nexus私服搭建步骤："><a href="#方式2-nexus私服搭建步骤：" class="headerlink" title="方式2 nexus私服搭建步骤："></a>方式2 nexus私服搭建步骤：</h3><pre><code>(1)首先从http://www.sonatype.org/nexus/下载最新版本的nexus，国外的网站可能访问速度会比较慢。
-分别有Bundle包和war包两种格式，Bundle包自带了Jetty容器，因此用户不需要额外的web容器就可以
-直接启动nexus，war包格式则需要部署到额外的web容器，该war包支持主流的web容器如Tomcat、Jetty、
-Glassfish、Resin。本文下载的是最新nexus-2.12.0-01版本的bundle包(windows系统)。下载之后解
-压文件得到两个子目录：
-</code></pre><p><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep1.png" alt=""><br>    <strong>nexus-2.12.0-01</strong>目录包含了nexus运行所需要的文件。<strong>sonatype-work</strong>目录包含nexus生成的配置文件，该目录不是必须的，nexus在运行的时候会动态创建该目录，但是它的内容包含了用户自己的配置和仓库内容。<br>    (2)在jsw文件夹下有很多文件夹，存放着各个系统的批处理文件，我这里选择Windows64位，进入后依次运行<strong>console-nexus.bat</strong>→<strong>install-nexus.bat</strong>→<strong>start-nexus.bat</strong>。<br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep2.png" alt=""><br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep3.png" alt=""><br>    (3)完成后用浏览器访问  <a href="http://127.0.0.1:8081/nexus" target="_blank" rel="external">http://127.0.0.1:8081/nexus</a>  有如下界面即成功，点击右上角登录，用户名为admin，密码为admin123。ps：8081是默认的端口号，进入nexus-2.12.0-01\conf\打开nexus.properties文件，修改application-port属性值即可修改端口号。<br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusstep4.png" alt=""><br>    (4)登录后，点击左侧的Repositories可以浏览现有仓库，这个列表包含了所有类型的nexus仓库，仓库有四种类型：group(仓库组)、host(宿主)、proxy(代理)和virtual(虚拟)。每个仓库的格式为maven2或者maven1。属性Policy表示该仓库为发布(release)版本还是快照(snapshot)版本，最后两列为仓库的状态和路径。<br>    各个仓库的简要介绍如下：<br>          Public Repositories:  仓库组<br>          3rd party: 无法从公共仓库获得的第三方发布版本的构件仓库<br>          Apache Snapshots: 用了代理ApacheMaven仓库快照版本的构件仓库<br>          Central: 用来代理maven中央仓库中发布版本构件的仓库<br>          Central M1 shadow: 用于提供中央仓库中M1格式的发布版本的构件镜像仓库<br>          Codehaus Snapshots: 用来代理CodehausMaven 仓库的快照版本构件的仓库<br>          Releases: 用来部署管理内部的发布版本构件的宿主类型仓库<br>          Snapshots:用来部署管理内部的快照版本构件的宿主类型仓库<br>    各个类型的仓库之间的联系如下图所示(本图来自《maven实战》)：<br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusrelation.jpg" alt=""><br>    maven可以直接从宿主仓库下载构件，也可以从代理仓库下载构件，而代理仓库会间接从远程仓库下载并缓存构件。为了方便，maven可以从仓库组下载构件，而仓库组没有实际内容，它会转向其包含的宿主仓库或代理仓库获得实际构件的内容。</p>
-<pre><code>点击此页菜单栏上的Add按钮会出现下图所示，可以分别添加四种仓库。
-</code></pre><p><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexusadd.png" alt=""><br>    例如选择Hosted Repository可以添加宿主仓库，仓库列表下方会出现如下配置：<br><img src="http://7xrt1z.com1.z0.glb.clouddn.com/nexushost.png" alt=""><br>    点击save后会在仓库列表中看到刚刚新增的仓库。由于是个人使用，我只创建了一个宿主仓库。创建其他类型的仓库详见《maven实战》第9章。<br>    (5)配置maven从nexus下载构件。<br>    此处有两种方式，第一种是在项目的pom中配置nexus仓库，但是只对maven项目有效。第二种是profile机制配置到setting.xml中，可以让本机所有的maven项目都使用自己的maven私服。<br>    未完待续。。。</p>
+        <ul>
+<li>在LeetCode上做的一道题目，想了很久没有想出比较简便的方法，借鉴了网上的方法之后做了然后做个总结。</li>
+</ul>
+<h4 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h4><p> Find the contiguous subarray within an array (containing at least one number) which has the largest sum.<br>For example, given the array [-2,1,-3,4,-1,2,1,-5,4],<br>the contiguous subarray [4,-1,2,1] has the largest sum = 6.<br>简单而言就是找出一个正负数都有的数组中最大的子数组之和。</p>
+<h4 id="分析解答"><a href="#分析解答" class="headerlink" title="分析解答"></a>分析解答</h4><ol>
+<li>看到这个题，首先想到的一个最简单但是时间复杂度最高的方法就是，把这个数组的所有子数组的和都求出来，一个一个比较，取最大值。<br>假设数组的长度为n，那么以它的每个元素的下标i（i从0开始）为子数组起点，都有n-i个子数组，所以所有的子数组个数是<br>n+n-1+n-2+n-3+…+4+3+2+1<br>=(n+1)+(n-1+2)+(n-2+3)+…<br>=(n/2)(n+1)<br>所以时间复杂度为O（n²）；</li>
+<li>动态规划（复杂度为O(n)）。对于数组中第i个元素来说，设curSum为nums[i]之前的累加和最大值，如果这个最大值<0，那么加上nums[i]之后必然会使累加和变小。即cursum+nums[i]<nums[i]，所以此时应该丢掉之前的累加和，从nums[i]重新开始累加。反之，cursum+nums[i]>nums[i]，必定会使和变大（即便nums[i]为负数）。这样，每循环一个元素，都能保证去掉拖后腿的累加和。只要不拖后腿，能多加一个正数，肯定是有利于累加和的增大。从这些累加中比较出值大的累加和即可。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">public static int maxSubArray(int[] nums)&#123;</div><div class="line">		int curSum = nums[0];//curSum为nums[i]之前的累加和最大值</div><div class="line">		int maxSum = nums[0];//最大累加和</div><div class="line">		int curBegin = 0;//当前累加和起点</div><div class="line">		int maxBegin = 0;//最大累加和起点</div><div class="line">		int maxEnd = 0;//最大累加和终点</div><div class="line">		for(int i=1;i&lt;nums.length;i++)&#123;</div><div class="line">			if(curSum&gt;0)&#123;</div><div class="line">				//如果之前的累加和&gt;0，加上nums[i]元素</div><div class="line">				curSum += nums[i];</div><div class="line">			&#125;else&#123;</div><div class="line">				//否则，以nums[i]为起点重新开始</div><div class="line">				curSum = nums[i];</div><div class="line">				curBegin = i;</div><div class="line">			&#125;</div><div class="line">			//如果当前累加和&gt;记录的累加和，赋值。并将当前累加和的起终点记录下来</div><div class="line">			if(curSum &gt; maxSum)&#123;</div><div class="line">				maxSum = curSum;</div><div class="line">				maxBegin = curBegin;</div><div class="line">				maxEnd = i;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		System.out.println(&quot;起点:&quot;+maxBegin+&quot;,终点:&quot;+maxEnd);</div><div class="line">		return maxSum;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></0，那么加上nums[i]之后必然会使累加和变小。即cursum+nums[i]<nums[i]，所以此时应该丢掉之前的累加和，从nums[i]重新开始累加。反之，cursum+nums[i]></li>
+</ol>
 
       
     </div>
@@ -384,14 +366,18 @@ Glassfish、Resin。本文下载的是最新nexus-2.12.0-01版本的bundle包(wi
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/01/09/Springdingshiqi/" rel="next" title="Java定时器，Spring定时器极其部署方式">
+                <i class="fa fa-chevron-left"></i> Java定时器，Spring定时器极其部署方式
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/12/07/weixin_chengweikaifazhe/" rel="prev" title="微信java开发系列 一、认证成为开发者">
-                微信java开发系列 一、认证成为开发者 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/05/14/SOAP/" rel="prev" title="基于SOAP的webservice（1）、JAX-WS实现">
+                基于SOAP的webservice（1）、JAX-WS实现 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -523,7 +509,7 @@ Glassfish、Resin。本文下载的是最新nexus-2.12.0-01版本的bundle包(wi
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#动机："><span class="nav-number">1.</span> <span class="nav-text">动机：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#所用环境："><span class="nav-number">2.</span> <span class="nav-text">所用环境：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析："><span class="nav-number">3.</span> <span class="nav-text">分析：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方式1-打war包步骤："><span class="nav-number">4.</span> <span class="nav-text">方式1 打war包步骤：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方式2-nexus私服搭建步骤："><span class="nav-number">5.</span> <span class="nav-text">方式2 nexus私服搭建步骤：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#题目描述"><span class="nav-number">1.</span> <span class="nav-text">题目描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析解答"><span class="nav-number">2.</span> <span class="nav-text">分析解答</span></a></li></ol></div>
             
 
           </div>
