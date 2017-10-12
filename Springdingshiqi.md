@@ -2,9 +2,8 @@
 title: Java定时器，Spring定时器极其部署方式
 date: 2017-01-09
 ---
-* 记录几种定时器的实现方式——仅仅在应用层面，简单的实现。本文在完成过程中参考了[详解java定时任务](http://www.cnblogs.com/chenssy/p/3788407.html)、[Spring定时任务的几种实现](http://gong1208.iteye.com/blog/1773177)等文章。
+记录几种定时器的实现方式——仅仅在应用层面，简单的实现。本文在完成过程中参考了[详解java定时任务](http://www.cnblogs.com/chenssy/p/3788407.html)、[Spring定时任务的几种实现](http://gong1208.iteye.com/blog/1773177)等文章。
 
----
 ###  实现定时器的几种方式
 1.  java.util.Timer与java.util.TimerTask。个人总结了一下，这种方式因为有一些缺陷，适合一些简单的定时任务。参考文章[详解java定时任务](http://www.cnblogs.com/chenssy/p/3788407.html)，非常详细。
 2. Spring与Quartz的结合，配置比较麻烦，公司的老项目还在用这种方式。
@@ -15,8 +14,8 @@ date: 2017-01-09
 2. 如果是web工程，将spring加进web.xml的监听器，随着web工程的启动而启动。
 
 ###  实例
-#### 1\. java.util.Timer与java.util.TimerTask简单实例。
-(1) 、创建任务类
+####  一、java.util.Timer与java.util.TimerTask简单实例。
+#####  1、创建任务类
 ```java
   package org.my.timertask;
   import java.text.SimpleDateFormat;
@@ -35,7 +34,7 @@ date: 2017-01-09
 	}
 }
 ```
-(2)、使用调度对象进行调用
+#####  2、使用调度对象进行调用
 ```java
   package org.my.timertask;
   import java.util.Timer;
@@ -46,18 +45,27 @@ date: 2017-01-09
 		//传递参数。第一个参数是TimerTask对象（指定要执行的任务）,第二个参数是延迟时间，第三个参数是时间间隔（毫秒）
 		t.schedule(new TimerTaskDemo(),0,5000);
 	}
-  }
+}
 ```
-运行结果：
-![运行结果](http://7xrt1z.com1.z0.glb.clouddn.com/7%60NPRRW5LO$@~YGF@B%5BMP7I.png)
-#### 2\. Spring与Quartz的结合使用
- (1)、导入jar包：org.quartz-scheduler，我使用的是2.1.1。我用的Spring的版本是Spring4.0.2，如果使用quartz2.x与Spring3.1以上的版本，配置的bean类必须与本配置一致。根据Spring和quart的版本不同，会有不同的配置。quartz2.x与Spring3.1以上的版本将老版本很多类名加了Factory，比如将CronTriggerBean修改为CronTriggerFactoryBean、将JobDetailBean修改为JobDetailFactoryBean等等，如果用quartz2.x与Spring3.1以上的版本的jar，而使用低版本的配置——CronTriggerBean和JobDetailBean话，会出现类似以下的错误
-```java
+运行结果
+![运行结果](http://upload-images.jianshu.io/upload_images/3727888-032e1673dfed8458.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+##### 3、缺陷
+
+Timer在执行所有定时任务时只会创建一个线程，如果某个任务的执行时间过长，那么将破坏其他TimerTask的定时精确性。例如某个周期TimerTask需要每10ms执行一次，而另一个TimerTask需要执行40ms，那么这个周期任务会在40ms任务执行完成后快速连续地调用4次或者彻底丢失这4次调用（取决于它是基于固定频率来调度还是固定延时来调度。）
+
+Timer的另一个问题是，如果TimerTask抛出了一个未检查的异常，那么Timer线程不会捕获异常，此时会终止定时线程，并且不会恢复。那么整个Timer就被错误的取消了（摘自《Java并发编程实战》）。
+
+
+#### 二、Spring与Quartz的结合使用
+##### 1、导入jar包
+org.quartz-scheduler，我使用的是2.1.1。我用的Spring的版本是Spring4.0.2，如果使用quartz2.x与Spring3.1以上的版本，配置的bean类必须与本配置一致。根据Spring和quart的版本不同，会有不同的配置。quartz2.x与Spring3.1以上的版本将老版本很多类名加了Factory，比如将CronTriggerBean修改为CronTriggerFactoryBean、将JobDetailBean修改为JobDetailFactoryBean等等，如果用quartz2.x与Spring3.1以上的版本的jar，而使用低版本的配置——CronTriggerBean和JobDetailBean话，会出现类似以下的错误
+
 class org.springframework.scheduling.quartz.JobDetailBean has interface org.quartz.JobDetail as super class
-```
+
 这个错误，即代表jar包版本和配置不一致。
-```html
-<properties>  
+```xml
+<properties>
       <!-- spring版本号 -->  
       <spring.version>4.0.2.RELEASE</spring.version> 
       <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -75,8 +83,10 @@ class org.springframework.scheduling.quartz.JobDetailBean has interface org.quar
         <version>${spring.version}</version>  
     </dependency> 
 ```
-(2)、编写任务类，Spring与Quartz的结合使用，其任务类有两种方式——任务类继承QuartzJobBean类、任务类不继承特定类。
-   >任务类继承QuartzJobBean类，需要重写executeInternal方法：
+##### 2、编写任务类
+Spring与Quartz的结合使用，其任务类有两种方式——任务类继承QuartzJobBean类、任务类不继承特定类。
+
+任务类继承QuartzJobBean类，需要重写executeInternal方法：
 ```java
 package org.my.SpringQuartz;
 import java.text.SimpleDateFormat;
@@ -90,8 +100,9 @@ public class SpringQuartzJob extends QuartzJobBean {
 		SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		System.out.println("这是SpringQuartzJob定时任务...任务类继承QuartzJobBean,当前时间："+sdf.format(new Date()));	
 	}
-}```
-> 任务类不继承特定类，POJO，方法名自定义：
+}
+```
+ 任务类不继承特定类，POJO，方法名自定义：
 ```java
 package org.my.SpringQuartz;
 import java.text.SimpleDateFormat;
@@ -103,8 +114,9 @@ public class NotExtendSpringQuartzJob {
 	}
 }
 ```
- (3)、spring配置：
-```html
+
+#####  3、spring配置：
+```xml
 <?xml version="1.0" encoding="UTF-8"?>  
 <beans xmlns="http://www.springframework.org/schema/beans"  
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"  
@@ -182,7 +194,7 @@ public class NotExtendSpringQuartzJob {
 <!-- 定时任务配置（任务类不继承特定的类）结尾 --> 
 </beans> 
 ```
-(4)、启动。
+##### 4、启动。
 ```java
 package org.my.SpringQuartz;
 import org.springframework.context.ApplicationContext;
@@ -193,10 +205,12 @@ public class StartSpringQuartz {
 	}
 }
 ```
-eclipse执行结果如下，红框外是根据指定时间间隔触发的——SimpleTriggerFactoryBean，红框内的是设定指定时间触发——CronTriggerFactoryBean，此处配置的是21:37分。![执行结果](http://7xrt1z.com1.z0.glb.clouddn.com/StartSpringQuartz.png)  
-#### 3\. Spring3.0以上版本自带的task。
+执行结果如下，红框外是根据指定时间间隔触发的——SimpleTriggerFactoryBean，红框内的是设定指定时间触发——CronTriggerFactoryBean，此处配置的是21:37分。
+
+![执行结果](http://upload-images.jianshu.io/upload_images/3727888-ff219945f5346e1e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)  
+#### 三、Spring3.0以上版本自带的task。
 **配置文件方式：**
-(1)、编写任务类，POJO。
+##### 1、编写任务类，POJO。
 ```java
 package org.my.SpringTask;
 import java.text.SimpleDateFormat;
@@ -210,10 +224,13 @@ public class TaskJob {
 	}
 }
 ```
-(2)、Spring配置（applicationContext-SpringTask.xml），在头部文件中加入了task声明。如果没有声明，会出现类似以下的异常
+##### 2、Spring配置
+applicationContext-SpringTask.xml，在头部文件中加入了task声明。如果没有声明，会出现类似以下的异常
+
 ```java
-“org.xml.sax.SAXParseException; lineNumber: 19; columnNumber: 24; cvc-complex-type.2.4.c: 通配符的匹配很全面, 但无法找到元素 'task:scheduled-tasks' 的声明。”```
-```html
+org.xml.sax.SAXParseException; lineNumber: 19; columnNumber: 24; cvc-complex-type.2.4.c: 通配符的匹配很全面, 但无法找到元素 'task:scheduled-tasks' 的声明。
+```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>  
 <beans xmlns="http://www.springframework.org/schema/beans"  
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"  
@@ -238,24 +255,21 @@ public class TaskJob {
 	</task:scheduled-tasks> 
 </beans> 
 ```
-(3)、启动
+#####  3、启动
 ```java
 package org.my.SpringTask;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class StartSpringTask {
-
 	public static void main(String[] args) {
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext-SpringTask.xml");
-
 	}
 }
 ```
 运行结果：
-![运行结果](http://7xrt1z.com1.z0.glb.clouddn.com/SpringTask.png)
+![运行结果](http://upload-images.jianshu.io/upload_images/3727888-1c280647a8fe3dc0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 **注解方式：**
-(1)、任务类：
+#####  1、任务类：
 ```java
 package org.my.SpringTaskComment;
 
@@ -273,8 +287,8 @@ package org.my.SpringTaskComment;
 	}
 }
 ```
-(2)、Spring开启注解扫描
-```html
+##### 2、Spring开启注解扫描
+```xml
 <?xml version="1.0" encoding="UTF-8"?>  
 <beans xmlns="http://www.springframework.org/schema/beans"  
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"  
@@ -295,18 +309,24 @@ package org.my.SpringTaskComment;
      <task:annotation-driven/>
 </beans> 
 ```  
-(3)、启动
+##### 3、启动
 ```java
 package org.my.SpringTaskComment;
+
  import org.springframework.context.ApplicationContext;
  import org.springframework.context.support.ClassPathXmlApplicationContext;
+
  public class StartSpringTaskComment {
-	public static void main(String[] args) {		
+
+	public static void main(String[] args) {
+		
 		ApplicationContext ctx = new  ClassPathXmlApplicationContext("applicationContext-SpringTask.xml");
+
 	}
 }
 ``` 
 执行结果：
-![执行结果](http://7xrt1z.com1.z0.glb.clouddn.com/SpringTaskComment.png)
+
+![执行结果](http://upload-images.jianshu.io/upload_images/3727888-a7579043749f59f6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 至此，三种定时方式简单实现了一遍，更多的配置参数，以及效率、性能在此未作深入研究。
