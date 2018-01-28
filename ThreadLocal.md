@@ -6,7 +6,7 @@ date: 2018-01-28 22:23:00
 
 众所周知，ThreadLocal的设计原理是给每个线程保存一份独立的变量的副本。这样就可以避免因为多个线程对同一份资源（变量）的操作而产生一些并发问题。相比于同步锁来说，是空间换时间的做法。在许多框架中，应用非常广泛。比如Spring的Singleton作用域模式，以及Struts2的ActionContext等等。
 
-###简单使用样例
+### 简单使用样例
 要理解一样东西，首先要学会使用，还是老的思路，先写个基本的使用的栗子。
 这个栗子中，ThreadLocalDemo 拥有一个ThreadLocal类型的静态变量local，然后在main方法中启动了两个线程，这两个线程分别对local中的数据（一个Integer类型的变量）进行初始化，然后进行加的操作，在操作的过程中使用了Thread.sleep(100L)增大两个线程交叉执行的几率。
 ```Java
@@ -80,8 +80,8 @@ public class ThreadLocalDemo {
 从结果看到，两个线程的操作互不干扰，最后的输出结果与各自线程单独执行的结果一致。这就是因为两个线程各自保存了这个变量的副本。此处如果在main方法中设置初始值（local.set(0)）而不在各自的线程里设置，那么在r1和r2中取值时会报空指针异常，进一步说明了这个问题：ThreadLocal中的变量是存在当前线程中的。
 本例中是将一个Integer存入到ThreadLocal中，如果我们将这个Integer换成一个map，那么我们就可以在一个ThreadLocal存放很多我们自己定义的数据了。
 
-###原理解析
-####宏观关系分析
+### 原理解析
+#### 宏观关系分析
 先上个图就一目了然了，根据这个图做一个简单的分析。
 
 ![threadLocal结构关系](http://upload-images.jianshu.io/upload_images/3727888-cb55f4e396dedc0e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -91,8 +91,8 @@ ThreadLocal中拥有一个内部类ThreadLocalMap、一个set方法、一个get�
 ThreadLocalMap是中是一个Entry结构（键值对，可以类比HashMap），这个Entry的key是一个ThreadLocal对象。
 Thread类中声明了一个ThreadLocalMap类型的变量。
 ThreadLocal中的set方法、get方法实际上是在操作Thread类中的threadLocals。
-####源码分析
-#####ThreadLocal的set、get方法
+#### 源码分析
+##### ThreadLocal的set、get方法
 set方法:
 ```Java
 public void set(T value) {
@@ -163,7 +163,7 @@ ThreadLocalMap getMap(Thread t) {
     return t.threadLocals;
 }
 ```
-#####ThreadLocalMap
+##### ThreadLocalMap
 在set方法的时候，有一个检查ThreadLocalMap中键值对的key为null，但是本身Entry对象不为null的细节，为了明白这个细节，最后我们看ThreadLocalMap的部分源码：
 ```java
 static class ThreadLocalMap {
