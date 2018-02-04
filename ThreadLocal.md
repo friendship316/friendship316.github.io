@@ -195,7 +195,7 @@ static class ThreadLocalMap {
 通过这段话我们知道，WeakReference是用来将这个类声明为弱引用的，一个类如果声明为弱引用类型，那么这个类的实例会在下一次垃圾回收的时候被回收。那么这里的Entry为什么要特殊设置便于垃圾回收呢？
 下图是本文开头的示例中ThreadLocal对象被引用的关系图：
 ![ThreadLocal引用关系](http://upload-images.jianshu.io/upload_images/3727888-927c8c7bb5f23ea5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-以本文开头的用例来说，ThreadLocalDemo中有一个ThreadLocal对象的引用local，而在线程t1、t2中的ThreadLocalMap中的key也指向了这个ThreadLocal对象，如果我在main线程中不需要这个ThreadLocal对象了，我人为将静态变量local指向为null，那么这个ThreadLocal对象应该被回收，因为强引用已经不在了。但是此时线程t1、t2中的ThreadLocalMap中的key还引用了这个ThreadLocal对象，如果这个引用是强引用，那么很显然ThreadLocal对象将永远不会被回收，直到t1、t2线程终止，如果t1、t2是线程池中的线程，长期不会被终止，那么这个ThreadLocal对象也就无法被回收，产生内存泄漏。而弱引用就很好的解决了这个问题，因为这个ThreadLocal对象的强引用一旦消失，只剩下几个弱引用，那么下次垃圾回收的时候，这个ThreadLocal对象还是会被回收。**所以就会出现上文set的时候，有的位置有Entry对象，但是却没有key的情况。**
+以本文开头的用例来说，ThreadLocalDemo中有一个ThreadLocal对象的引用local，而在线程t1、t2中的ThreadLocalMap中的key也指向了这个ThreadLocal对象，如果我在main线程中不需要这个ThreadLocal对象了，我人为将静态变量local指向为null，那么这个ThreadLocal对象应该被回收，因为强引用已经不在了。但是此时线程t1、t2中的ThreadLocalMap中的key还引用了这个ThreadLocal对象，如果这个引用是强引用，那么很显然ThreadLocal对象将永远不会被回收，直到t1、t2线程终止，如果t1、t2是线程池中的线程，长期不会被终止，那么这个ThreadLocal对象也就无法被回收，产生内存泄漏。而弱引用就很好的解决了这个问题，因为这个ThreadLocal对象的强引用一旦消失，只剩下几个弱引用，那么下次垃圾回收的时候，这个ThreadLocal对象还是会被回收。**所以就会出现上文set的时候，有的位置有Entry对象，但是却没有key的情况。**实际上，由于弱引用的存在，导致ThreadLocal很多方法都需要去清理这种key为null的Entry。
 参考：[十分钟理解Java中的弱引用](http://www.importnew.com/21206.html)、[ThreadLocal可能引起的内存泄露](http://www.cnblogs.com/onlywujun/p/3524675.html)
 
 
