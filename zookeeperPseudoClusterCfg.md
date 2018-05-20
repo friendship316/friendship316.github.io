@@ -1,6 +1,6 @@
 ---
 title: zookeeper安装与伪集群配置
-date: 2018-05-20 18:53:00
+date: 2018-05-20 18:53:24
 ---
 在自己学习分布式相关的技术时往往需要使用zookeeper伪集群配置，故记录于此。
 
@@ -69,15 +69,15 @@ zkServer start zoo1.cfg
 zkServer start zoo2.cfg
 zkServer start zoo3.cfg
 ```
-这里有一个点就是，因为我配置的是三个zk服务，所以只要当三台中正在运行的服务数少于(3+1)/2时，用zkServer status zoox.cfg命令查看相应的zk服务的状态都会显示```“Error contacting service. It is probably not running.”```，但是此时不代表zoox.cfg对应的服务没有启动，而是zk整个集群不可用。
+这里有一个点就是，因为我配置的是三个zk服务，所以只要当三台中正在运行的服务数少于(3+1)/2时，用zkServer status zoox.cfg命令查看相应的zk服务的状态都会显示`“Error contacting service. It is probably not running.”`，但是此时不代表zoox.cfg对应的服务没有启动，而是zk整个集群不可用。
 
-比如我首先启动zoo1.cfg对应的服务，然后我输入```zkServer status zoo1.cfg```查看状态，会显示:
+比如我首先启动zoo1.cfg对应的服务，然后我输入`zkServer status zoo1.cfg`查看状态，会显示:
 ```text 
 ZooKeeper JMX enabled by default
 Using config: /usr/local/etc/zookeeper/zoo1.cfg
 Error contacting service. It is probably not running.
 ```
-但是使用zkCli命令```zkCli -server 127.0.0.1:2182```其实可以连接到zoo1.cfg对应的zk服务的。
+但是使用zkCli命令`zkCli -server 127.0.0.1:2182`其实可以连接到zoo1.cfg对应的zk服务的。
 接下来启动zoo2.cfg之后，再查看zoo1.cfg和zoo2.cfg的状态：
 ```text
 192:zookeeper shakeli$ zkServer status zoo1.cfg
