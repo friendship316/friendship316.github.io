@@ -39,11 +39,13 @@ syncLimit=5
 dataDir=/usr/local/var/run/zookeeper/data/zk1
 dataLogDir=/usr/local/var/run/zookeeper/data/zk1/logs
 # the port at which the clients will connect
+# 用于客户端连接的端口（由于是同一台机器，所以每个zk服务对外的端口应该不一样）
 clientPort=2182
-# 伪集群配置
+# 伪集群配置 由于是同一台机器，为避免冲突将端口错开
+# 这里的2888-2890是zk服务之间相互通信的端口，3888-3890是选举leader的端口
 server.1=127.0.0.1:2888:3888
-server.2=127.0.0.1:2888:3889
-server.3=127.0.0.1:2888:3890
+server.2=127.0.0.1:2889:3889
+server.3=127.0.0.1:2890:3890
 # the maximum number of client connections.
 # increase this if you need to handle more clients
 #maxClientCnxns=60
