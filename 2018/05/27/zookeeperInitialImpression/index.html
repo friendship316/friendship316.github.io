@@ -1,0 +1,769 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zookeeper初印象">
+<meta property="og:url" content="http://yoursite.com/2018/05/27/zookeeperInitialImpression/index.html">
+<meta property="og:site_name" content="xiake">
+<meta property="og:description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/znodetree.png">
+<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg">
+<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg">
+<meta property="og:updated_time" content="2018-05-27T09:44:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zookeeper初印象">
+<meta name="twitter:description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
+<meta name="twitter:image" content="http://p9bex2mzr.bkt.clouddn.com/znodetree.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/27/zookeeperInitialImpression/"/>
+
+
+
+
+
+  <title> zookeeper初印象 | xiake </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xiake</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">go go go</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/27/zookeeperInitialImpression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiake">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xiake">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                zookeeper初印象
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-27T17:44:24+08:00">
+                2018-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考<a href="https://www.jianshu.com/p/f13a17e3e351" target="_blank" rel="external">zookeeper安装与伪集群配置</a>。</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><h4 id="znode基本特性"><a href="#znode基本特性" class="headerlink" title="znode基本特性"></a>znode基本特性</h4><p>zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：</p>
+<p><img src="http://p9bex2mzr.bkt.clouddn.com/znodetree.png" alt="zookeeper数据结构"></p>
+<p>每个znode包含三部分信息：</p>
+<blockquote>
+<ol>
+<li>stat. 此为状态信息, 描述该znode的版本, 权限等信息；</li>
+<li>data. 与该znode关联的数据；</li>
+<li>children. 该znode下的子节点；</li>
+</ol>
+</blockquote>
+<p>znode具有如下特性：</p>
+<blockquote>
+<ol>
+<li>每个znode的唯一标识是路径；</li>
+<li>拥有两种类型：永久节点(persistent)和临时节点(ephemeral)；<br>临时节点：一旦创建这个 znode 的客户端与服务器失去联系，这个 znode 也将自动删除，Zookeeper 的客户端和服务器通信采用长连接方式，每个客户端和服务器通过心跳来保持连接，这个连接状态称为 session，如果 znode 是临时节点，这个 session 失效，znode 也就删除了。<strong>临时节点不能拥有子节点</strong>；</li>
+<li>znode具有版本，也就是说一个节点可以存储多份数据；</li>
+<li>znode 的目录名可以自动编号，如 App1 已经存在，再创建的话，将会自动命名为 App2;<br>不管是永久节点还是临时节点，均可以在创建时指定参数<code>-s</code>使得多次创建相同名称的节点时按照顺序自动递增（这类节点又可以称为sequence节点）。</li>
+<li>znode 可以被监控，包括这个目录节点中存储的数据的修改，子节点目录的变化等，一旦变化可以通知设置监控的客户端，这个是 Zookeeper 的核心特性，Zookeeper 的很多功能都是基于这个特性实现的。</li>
+</ol>
+</blockquote>
+<h4 id="znode状态信息"><a href="#znode状态信息" class="headerlink" title="znode状态信息"></a>znode状态信息</h4><ol>
+<li>czxid. 节点创建时的zxid；</li>
+<li>mzxid. 节点最新一次更新发生时的zxid；</li>
+<li>ctime. 节点创建时的时间戳；</li>
+<li>mtime. 节点最新一次更新发生时的时间戳；</li>
+<li>dataVersion. 节点数据的更新次数；</li>
+<li>cversion. 其子节点的更新次数；</li>
+<li>aclVersion. 节点ACL(授权信息)的更新次数；</li>
+<li>ephemeralOwner. 如果该节点为ephemeral节点, ephemeralOwner值表示与该节点绑定的session id. 如果该节点不是ephemeral节点, ephemeralOwner值为0；</li>
+<li>dataLength. 节点数据的字节数；</li>
+<li>numChildren. 子节点个数；</li>
+</ol>
+<p>zxid:<br>ZooKeeper状态的每一次改变, 都对应着一个递增的Transaction(事务) id, 该id称为zxid. 由于zxid的递增性质, 如果zxid1小于zxid2, 那么zxid1肯定先于zxid2发生. 创建任意节点, 或者更新任意节点的数据, 或者删除任意节点, 都会导致Zookeeper状态发生改变, 从而导致zxid的值增加。</p>
+<h3 id="外在表现：分布式一致性"><a href="#外在表现：分布式一致性" class="headerlink" title="外在表现：分布式一致性"></a>外在表现：分布式一致性</h3><p>首先，通过一个简单的演示来加深印象，在本机启动了zk伪集群，启动之后查看状态时可以看到zoo1和zoo3是follwer的角色，zoo2是leader。zoo1对应的客户端端口是2182，zoo2对应的端口是2183，zoo3对应的端口是2184。</p>
+<p><img src="http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg" alt="zk伪集群"></p>
+<p>然后通过<code>zkCli -server 127.0.0.1:2182</code> 命令连上zoo1，并通过<code>ls /</code>命令查看其下的节点，发现只有一个zookeeper节点，然后此时通过<code>create /test &quot;测试&quot;</code>命令在根目录下创建一个简单的test节点，可以看到根目录下出现了test节点。<br>接下来退出zoo1并连接到集群中另外一台zoo2，可以看到zoo2下面也有test节点，同样的zoo3也有，而且内容一致，同样，我在任意一台删除test节点之后，整个集群中所有服务都会删除test节点。</p>
+<p><img src="http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg" alt="zk数据一致性"></p>
+<h3 id="内部机制：选主与广播"><a href="#内部机制：选主与广播" class="headerlink" title="内部机制：选主与广播"></a>内部机制：选主与广播</h3><h4 id="zookeeper集群中三种角色"><a href="#zookeeper集群中三种角色" class="headerlink" title="zookeeper集群中三种角色"></a>zookeeper集群中三种角色</h4><ol>
+<li>领导者（leader），负责进行投票的发起和决议，更新系统状态</li>
+<li>学习者（learner），包括跟随者（follower）和观察者（observer），follower用于接受客户端请求并想客户端返回结果，在选主过程中参与投票<ol>
+<li>Observer可以接受客户端连接，将写请求转发给leader，但observer不参加投票过程，只同步leader的状态，observer的目的是为了扩展系统，提高读取速度<h4 id="zookeeper请求类型"><a href="#zookeeper请求类型" class="headerlink" title="zookeeper请求类型"></a>zookeeper请求类型</h4>对于exists，getData，getChildren等只读请求，收到该请求的zk服务器将会在本地处理，因为每个服务器看到的数据结构内容都是一致的，无所谓在哪台机器上读取数据，因此如果ZooKeeper集群的负载是读多写少，并且读请求分布得均衡的话，效率是很高的。<br>对于create，setData，delete等有写操作的请求，则需要统一转发给leader处理，leader需要决定编号、执行操作，这个过程称为一个事务（transaction）。</li>
+</ol>
+</li>
+</ol>
+<h4 id="选主过程"><a href="#选主过程" class="headerlink" title="选主过程"></a>选主过程</h4><p>当zookeeper集群启动或者leader崩溃额时候，zk进入恢复模式，开始进行选举。<br>Zk的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。</p>
+<h5 id="basic-paxos流程："><a href="#basic-paxos流程：" class="headerlink" title="basic paxos流程："></a>basic paxos流程：</h5><ol>
+<li>选举线程由当前Server发起选举的线程担任，其主要功能是对投票结果进行统计，并选出推荐的Server；</li>
+<li>选举线程首先向所有Server发起一次询问(包括自己)；</li>
+<li>选举线程收到回复后，验证是否是自己发起的询问(验证zxid是否一致)，然后获取对方的id(myid)，并存储到当前询问对象列表中，最后获取对方提议的leader相关信息(id,zxid)，并将这些信息存储到当次选举的投票记录表中；</li>
+<li>收到所有Server回复以后，就计算出zxid最大的那个Server，并将这个Server相关信息设置成下一次要投票的Server；</li>
+<li>线程将当前zxid最大的Server设置为当前Server要推荐的Leader，如果此时获胜的Server获得n/2 + 1的Server票数， 设置当前推荐的leader为获胜的Server，将根据获胜的Server相关信息设置自己的状态，否则，继续这个过程，直到leader被选举出来。</li>
+</ol>
+<p>通过流程分析我们可以得出：要使Leader获得多数Server的支持，则Server总数必须是奇数2n+1，且存活的Server的数目不得少于n+1.</p>
+<h5 id="fast-paxos流程"><a href="#fast-paxos流程" class="headerlink" title="fast paxos流程"></a>fast paxos流程</h5><p>fast paxos流程是在选举过程中，某Server首先向所有Server提议自己要成为leader，当其它Server收到提议以后，解决epoch和 zxid的冲突，并接受对方的提议，然后向对方发送接受提议完成的消息，重复这个流程，最后一定能选举出Leader。</p>
+<h4 id="接收工作流程"><a href="#接收工作流程" class="headerlink" title="接收工作流程"></a>接收工作流程</h4><h5 id="Leader主要有三个功能："><a href="#Leader主要有三个功能：" class="headerlink" title="Leader主要有三个功能："></a>Leader主要有三个功能：</h5><ol>
+<li>恢复数据；</li>
+<li>维持与Learner的心跳，接收Learner请求并判断Learner的请求消息类型；</li>
+<li>Learner的消息类型主要有PING消息、REQUEST消息、ACK消息、REVALIDATE消息，根据不同的消息类型，进行不同的处理。<br>PING消息是指Learner的心跳信息；REQUEST消息是Follower发送的提议信息，包括写请求及同步请求；ACK消息是 Follower的对提议的回复，超过半数的Follower通过，则commit该提议；REVALIDATE消息是用来延长SESSION有效时间。<h5 id="Follower主要有四个功能："><a href="#Follower主要有四个功能：" class="headerlink" title="Follower主要有四个功能："></a>Follower主要有四个功能：</h5></li>
+<li>向Leader发送请求（PING消息、REQUEST消息、ACK消息、REVALIDATE消息）；</li>
+<li>接收Leader消息并进行处理；</li>
+<li>接收Client的请求，如果为写请求，发送给Leader进行投票；</li>
+<li>返回Client结果。</li>
+</ol>
+<p>Follower的消息循环处理如下几种来自Leader的消息：</p>
+<ol>
+<li>PING消息：心跳消息；</li>
+<li>PROPOSAL消息：Leader发起的提案，要求Follower投票；</li>
+<li>COMMIT消息：服务器端最新一次提案的信息；</li>
+<li>UPTODATE消息：表明同步完成；</li>
+<li>REVALIDATE消息：根据Leader的REVALIDATE结果，关闭待revalidate的session还是允许其接受消息；</li>
+<li>SYNC消息：返回SYNC结果到客户端，这个消息最初由客户端发起，用来强制得到最新的更新。</li>
+</ol>
+<p>本文参考文章：</p>
+<ol>
+<li><a href="https://my.oschina.net/xianggao/blog/531613" target="_blank" rel="external">ZooKeeper典型应用场景实践</a>。</li>
+<li><a href="https://www.cnblogs.com/wade-luffy/p/6103956.html" target="_blank" rel="external">zk常用命令</a>。</li>
+<li><a href="https://blog.csdn.net/mayp1/article/details/52026797" target="_blank" rel="external">zookeeper三种角色</a>。</li>
+<li><a href="https://blog.csdn.net/gs80140/article/details/51496925" target="_blank" rel="external">zookeeper原理与应用</a>。</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/20/zookeeperPseudoClusterCfg/" rel="next" title="zookeeper安装与伪集群配置">
+                <i class="fa fa-chevron-left"></i> zookeeper安装与伪集群配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG"
+               alt="xiake" />
+          <p class="site-author-name" itemprop="name">xiake</p>
+           
+              <p class="site-description motion-element" itemprop="description">just some note</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/28fe84130b9c" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据结构"><span class="nav-number">1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#znode基本特性"><span class="nav-number">1.1.</span> <span class="nav-text">znode基本特性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#znode状态信息"><span class="nav-number">1.2.</span> <span class="nav-text">znode状态信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#外在表现：分布式一致性"><span class="nav-number">2.</span> <span class="nav-text">外在表现：分布式一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部机制：选主与广播"><span class="nav-number">3.</span> <span class="nav-text">内部机制：选主与广播</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#zookeeper集群中三种角色"><span class="nav-number">3.1.</span> <span class="nav-text">zookeeper集群中三种角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zookeeper请求类型"><span class="nav-number">3.2.</span> <span class="nav-text">zookeeper请求类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#选主过程"><span class="nav-number">3.3.</span> <span class="nav-text">选主过程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#basic-paxos流程："><span class="nav-number">3.3.1.</span> <span class="nav-text">basic paxos流程：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#fast-paxos流程"><span class="nav-number">3.3.2.</span> <span class="nav-text">fast paxos流程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接收工作流程"><span class="nav-number">3.4.</span> <span class="nav-text">接收工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Leader主要有三个功能："><span class="nav-number">3.4.1.</span> <span class="nav-text">Leader主要有三个功能：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Follower主要有四个功能："><span class="nav-number">3.4.2.</span> <span class="nav-text">Follower主要有四个功能：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiake</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
