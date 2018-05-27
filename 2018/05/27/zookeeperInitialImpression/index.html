@@ -97,7 +97,7 @@
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/znodetree.png">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg">
-<meta property="og:updated_time" content="2018-05-27T09:53:38.000Z">
+<meta property="og:updated_time" content="2018-05-27T09:56:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper初印象">
 <meta name="twitter:description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
@@ -367,8 +367,9 @@
 <h3 id="内部机制：选主与广播"><a href="#内部机制：选主与广播" class="headerlink" title="内部机制：选主与广播"></a>内部机制：选主与广播</h3><h4 id="zookeeper集群中三种角色"><a href="#zookeeper集群中三种角色" class="headerlink" title="zookeeper集群中三种角色"></a>zookeeper集群中三种角色</h4><ol>
 <li>领导者（leader），负责进行投票的发起和决议，更新系统状态</li>
 <li>学习者（learner），包括跟随者（follower）和观察者（observer），follower用于接受客户端请求并想客户端返回结果，在选主过程中参与投票</li>
-<li>Observer可以接受客户端连接，将写请求转发给leader，但observer不参加投票过程，只同步leader的状态，observer的目的是为了扩展系统，提高读取速度<h4 id="zookeeper请求类型"><a href="#zookeeper请求类型" class="headerlink" title="zookeeper请求类型"></a>zookeeper请求类型</h4>对于exists，getData，getChildren等只读请求，收到该请求的zk服务器将会在本地处理，因为每个服务器看到的数据结构内容都是一致的，无所谓在哪台机器上读取数据，因此如果ZooKeeper集群的负载是读多写少，并且读请求分布得均衡的话，效率是很高的。<br>对于create，setData，delete等有写操作的请求，则需要统一转发给leader处理，leader需要决定编号、执行操作，这个过程称为一个事务（transaction）。</li>
+<li>Observer可以接受客户端连接，将写请求转发给leader，但observer不参加投票过程，只同步leader的状态，observer的目的是为了扩展系统，提高读取速度</li>
 </ol>
+<h4 id="zookeeper请求类型"><a href="#zookeeper请求类型" class="headerlink" title="zookeeper请求类型"></a>zookeeper请求类型</h4><p>对于exists，getData，getChildren等只读请求，收到该请求的zk服务器将会在本地处理，因为每个服务器看到的数据结构内容都是一致的，无所谓在哪台机器上读取数据，因此如果ZooKeeper集群的负载是读多写少，并且读请求分布得均衡的话，效率是很高的。<br>对于create，setData，delete等有写操作的请求，则需要统一转发给leader处理，leader需要决定编号、执行操作，这个过程称为一个事务（transaction）。</p>
 <h4 id="选主过程"><a href="#选主过程" class="headerlink" title="选主过程"></a>选主过程</h4><p>当zookeeper集群启动或者leader崩溃额时候，zk进入恢复模式，开始进行选举。<br>Zk的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。</p>
 <h5 id="basic-paxos流程："><a href="#basic-paxos流程：" class="headerlink" title="basic paxos流程："></a>basic paxos流程：</h5><ol>
 <li>选举线程由当前Server发起选举的线程担任，其主要功能是对投票结果进行统计，并选出推荐的Server；</li>
