@@ -56,7 +56,7 @@ ZooKeeper状态的每一次改变, 都对应着一个递增的Transaction(事务
 #### zookeeper集群中三种角色
 1. 领导者（leader），负责进行投票的发起和决议，更新系统状态
 2. 学习者（learner），包括跟随者（follower）和观察者（observer），follower用于接受客户端请求并想客户端返回结果，在选主过程中参与投票
- 3. Observer可以接受客户端连接，将写请求转发给leader，但observer不参加投票过程，只同步leader的状态，observer的目的是为了扩展系统，提高读取速度
+3. Observer可以接受客户端连接，将写请求转发给leader，但observer不参加投票过程，只同步leader的状态，observer的目的是为了扩展系统，提高读取速度
 #### zookeeper请求类型
 对于exists，getData，getChildren等只读请求，收到该请求的zk服务器将会在本地处理，因为每个服务器看到的数据结构内容都是一致的，无所谓在哪台机器上读取数据，因此如果ZooKeeper集群的负载是读多写少，并且读请求分布得均衡的话，效率是很高的。
 对于create，setData，delete等有写操作的请求，则需要统一转发给leader处理，leader需要决定编号、执行操作，这个过程称为一个事务（transaction）。
@@ -71,7 +71,6 @@ Zk的选举算法有两种：一种是基于basic paxos实现的，另外一种�
 4.  收到所有Server回复以后，就计算出zxid最大的那个Server，并将这个Server相关信息设置成下一次要投票的Server；
 5.  线程将当前zxid最大的Server设置为当前Server要推荐的Leader，如果此时获胜的Server获得n/2 + 1的Server票数， 设置当前推荐的leader为获胜的Server，将根据获胜的Server相关信息设置自己的状态，否则，继续这个过程，直到leader被选举出来。
 
-
 通过流程分析我们可以得出：要使Leader获得多数Server的支持，则Server总数必须是奇数2n+1，且存活的Server的数目不得少于n+1.
 
 ##### fast paxos流程
@@ -83,6 +82,7 @@ fast paxos流程是在选举过程中，某Server首先向所有Server提议自�
 2. 维持与Learner的心跳，接收Learner请求并判断Learner的请求消息类型；
 3. Learner的消息类型主要有PING消息、REQUEST消息、ACK消息、REVALIDATE消息，根据不同的消息类型，进行不同的处理。
 PING消息是指Learner的心跳信息；REQUEST消息是Follower发送的提议信息，包括写请求及同步请求；ACK消息是 Follower的对提议的回复，超过半数的Follower通过，则commit该提议；REVALIDATE消息是用来延长SESSION有效时间。
+
 ##### Follower主要有四个功能：
 1. 向Leader发送请求（PING消息、REQUEST消息、ACK消息、REVALIDATE消息）；
 2. 接收Leader消息并进行处理；
