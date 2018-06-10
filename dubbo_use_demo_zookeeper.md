@@ -2,7 +2,7 @@
 title: dubbo使用入门-使用zookeeper作为注册中心
 date: 2018-06-08 15:38:24
 ---
-关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考[zookeeper伪集群安装](https://www.jianshu.com/p/f13a17e3e351)。
+关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子，简要分析了一下dubbo使用zookeeper的命名服务进行注册的外在表现。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考[zookeeper伪集群安装](https://www.jianshu.com/p/f13a17e3e351)。
 ### 工程目录结构
 这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服务提供方，dubbo-interface作为公共jar包提供引用接口。如下图所示，dubbo-interface中只定义了一个接口HelloService，有一个方法sayHello。
 
@@ -181,7 +181,9 @@ public class Consumer {
 ![provider](http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_znode.png)
 
 可以看到在根结点下新增了节点dubbo，然后在dubbo节点下有了HelloService节点，HelloService下面有这个服务的配置节点configurators和提供方providers，由于目前我只启动了一个服务，所以providers下面只有一个节点。这个节点的内容是一个URL（这个URL包含了服务提供方的详细信息，详细含义此处不作解读），将这个URL转义之后可以得到：
->dubbo://192.168.0.103:20880/com.liepin.interfaces.HelloService?anyhost=true&application=demo-provider&dubbo=2.6.1&generic=false&interface=com.liepin.interfaces.HelloService&methods=sayHello&pid=2520&revision=1.0-SNAPSHOT&side=provider&timestamp=1528621287574
+>dubbo://192.168.0.103:20880/com.liepin.interfaces.HelloService?anyhost=true&application=demo-provider&dubbo=2.6.1&generic=false
+&interface=com.liepin.interfaces.HelloService&methods=sayHello
+&pid=2520&revision=1.0-SNAPSHOT&side=provider&timestamp=1528621287574
 
 接下来我们再启动consumer（此处为了便于观察，我的consumer调用之后并未结束程序，而是在Consumer的main方法后面加上System.in.read()使其阻塞了）：
 
@@ -189,7 +191,10 @@ public class Consumer {
 
 可以看到，启动了consumer之后，HelloService节点下新增了两个节点：consumers和routers。consumers下面也是一个URL（这个URL包含了服务消费方的详细信息，详细含义此处不作解读）：
 
->consumer://192.168.0.103/com.liepin.interfaces.HelloService?application=demo-consumer&category=consumers&check=false&dubbo=2.6.1&interface=com.liepin.interfaces.HelloService&methods=sayHello&pid=2683&revision=1.0-SNAPSHOT&side=consumer&timestamp=1528622384726
+>consumer://192.168.0.103/com.liepin.interfaces.HelloService?application=demo-consumer
+&category=consumers&check=false&dubbo=2.6.1
+&interface=com.liepin.interfaces.HelloService&methods=sayHello
+&pid=2683&revision=1.0-SNAPSHOT&side=consumer&timestamp=1528622384726
 
 使用get命令查看节点数据：
 
