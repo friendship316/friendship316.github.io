@@ -87,12 +87,12 @@
 
 
 
-<meta name="description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服">
+<meta name="description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子，简要分析了一下dubbo使用zookeeper的命名服务进行注册的外在表现。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），d">
 <meta property="og:type" content="article">
 <meta property="og:title" content="dubbo使用入门-使用zookeeper作为注册中心">
 <meta property="og:url" content="http://yoursite.com/2018/06/08/dubbo_use_demo_zookeeper/index.html">
 <meta property="og:site_name" content="xiake">
-<meta property="og:description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服">
+<meta property="og:description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子，简要分析了一下dubbo使用zookeeper的命名服务进行注册的外在表现。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），d">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/dubbo_projects.png">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zookeeper_default_node.png">
@@ -100,10 +100,10 @@
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode.png">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode_info.png">
 <meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/consumer_linshi_znode.png">
-<meta property="og:updated_time" content="2018-06-10T10:00:48.000Z">
+<meta property="og:updated_time" content="2018-06-10T10:12:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="dubbo使用入门-使用zookeeper作为注册中心">
-<meta name="twitter:description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服">
+<meta name="twitter:description" content="关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子，简要分析了一下dubbo使用zookeeper的命名服务进行注册的外在表现。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考zookeeper伪集群安装。 工程目录结构这里创建三个maven工程（此处不是web工程），d">
 <meta name="twitter:image" content="http://p9bex2mzr.bkt.clouddn.com/dubbo_projects.png">
 
 
@@ -329,7 +329,7 @@
       
 
       
-        <p>关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考<a href="https://www.jianshu.com/p/f13a17e3e351" target="_blank" rel="external">zookeeper伪集群安装</a>。</p>
+        <p>关于dubbo的使用，在dubbo的apache官网上其实说的很清楚了，在这里只是记录一下dubbo使用zookeeper作为注册中心的使用例子，简要分析了一下dubbo使用zookeeper的命名服务进行注册的外在表现。使用的是zookeeper伪集群配置，关于zookeeper伪集群配置的安装请参考<a href="https://www.jianshu.com/p/f13a17e3e351" target="_blank" rel="external">zookeeper伪集群安装</a>。</p>
 <h3 id="工程目录结构"><a href="#工程目录结构" class="headerlink" title="工程目录结构"></a>工程目录结构</h3><p>这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服务提供方，dubbo-interface作为公共jar包提供引用接口。如下图所示，dubbo-interface中只定义了一个接口HelloService，有一个方法sayHello。</p>
 <p><img src="http://p9bex2mzr.bkt.clouddn.com/dubbo_projects.png" alt="工程目录结构"></p>
 <h3 id="服务提供方"><a href="#服务提供方" class="headerlink" title="服务提供方"></a>服务提供方</h3><p>dubbo-provider中的pom.xml加入如下依赖：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">&lt;!--dubbo-interface 接口依赖--&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.liepin<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>dubbo-interface<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"><span class="comment">&lt;!--dubbo依赖--&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>dubbo<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"><span class="comment">&lt;!--zookeeper--&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.zookeeper<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>zookeeper<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.4.9<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"><span class="comment">&lt;!--zkClient--&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.sgroschupf<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>zkclient<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure></p>
@@ -347,13 +347,13 @@
 <p><img src="http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_znode.png" alt="provider"></p>
 <p>可以看到在根结点下新增了节点dubbo，然后在dubbo节点下有了HelloService节点，HelloService下面有这个服务的配置节点configurators和提供方providers，由于目前我只启动了一个服务，所以providers下面只有一个节点。这个节点的内容是一个URL（这个URL包含了服务提供方的详细信息，详细含义此处不作解读），将这个URL转义之后可以得到：</p>
 <blockquote>
-<p>dubbo://192.168.0.103:20880/com.liepin.interfaces.HelloService?anyhost=true&amp;application=demo-provider&amp;dubbo=2.6.1&amp;generic=false&amp;interface=com.liepin.interfaces.HelloService&amp;methods=sayHello&amp;pid=2520&amp;revision=1.0-SNAPSHOT&amp;side=provider&amp;timestamp=1528621287574</p>
+<p>dubbo://192.168.0.103:20880/com.liepin.interfaces.HelloService?anyhost=true&amp;application=demo-provider&amp;dubbo=2.6.1&amp;generic=false<br>&amp;interface=com.liepin.interfaces.HelloService&amp;methods=sayHello<br>&amp;pid=2520&amp;revision=1.0-SNAPSHOT&amp;side=provider&amp;timestamp=1528621287574</p>
 </blockquote>
 <p>接下来我们再启动consumer（此处为了便于观察，我的consumer调用之后并未结束程序，而是在Consumer的main方法后面加上System.in.read()使其阻塞了）：</p>
 <p><img src="http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode.png" alt="consumer"></p>
 <p>可以看到，启动了consumer之后，HelloService节点下新增了两个节点：consumers和routers。consumers下面也是一个URL（这个URL包含了服务消费方的详细信息，详细含义此处不作解读）：</p>
 <blockquote>
-<p>consumer://192.168.0.103/com.liepin.interfaces.HelloService?application=demo-consumer&amp;category=consumers&amp;check=false&amp;dubbo=2.6.1&amp;interface=com.liepin.interfaces.HelloService&amp;methods=sayHello&amp;pid=2683&amp;revision=1.0-SNAPSHOT&amp;side=consumer&amp;timestamp=1528622384726</p>
+<p>consumer://192.168.0.103/com.liepin.interfaces.HelloService?application=demo-consumer<br>&amp;category=consumers&amp;check=false&amp;dubbo=2.6.1<br>&amp;interface=com.liepin.interfaces.HelloService&amp;methods=sayHello<br>&amp;pid=2683&amp;revision=1.0-SNAPSHOT&amp;side=consumer&amp;timestamp=1528622384726</p>
 </blockquote>
 <p>使用get命令查看节点数据：</p>
 <p><img src="http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode_info.png" alt="查看节点数据"></p>
