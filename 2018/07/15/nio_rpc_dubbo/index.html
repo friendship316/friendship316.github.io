@@ -99,7 +99,7 @@
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-2a3e097144cd7a11?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-a93021a1bbf552f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-098e4b3fb2b736f2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-07-15T11:36:43.000Z">
+<meta property="og:updated_time" content="2018-07-15T11:55:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NIO单一长连接——dubbo通信模型实现">
 <meta name="twitter:description" content="前言前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一">
@@ -329,7 +329,7 @@
 
       
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一个demo，当然不乏一些脑补的东西在里面，如您偶然阅读此文发现问题，还请不吝指出问题所在。</p>
-<h3 id="BIO通信缺陷"><a href="#BIO通信缺陷" class="headerlink" title="BIO通信缺陷"></a>BIO通信缺陷</h3><p>为了相对更好的理解dubbo这个通信模型的优势，首先需要回顾一下BIO通信的缺陷。<br>为此引用一下我之前借鉴dubbo作者梁飞的博客（<a href="http://javatar.iteye.com/blog/1123915" target="_blank" rel="external">RPC框架几行代码就够了</a>）而实现的一个用BIO实现的RPC示例：<a href="https://www.jianshu.com/p/d3c7a5bbca09" target="_blank" rel="external">RPC原理简析——三分钟看完</a>，这里使用的是BIO的socket和ServerSocket实现通讯，用流来写入写出数据。BIO的完整连接示意图如下：</p>
+<h3 id="BIO通信缺陷"><a href="#BIO通信缺陷" class="headerlink" title="BIO通信缺陷"></a>BIO通信缺陷</h3><p>为了相对更好的理解dubbo这个通信模型的优势，首先需要回顾一下BIO通信的缺陷。<br>为此引用一下我之前借鉴dubbo作者梁飞的博客（<a href="http://javatar.iteye.com/blog/1123915" target="_blank" rel="external">RPC框架几行代码就够了</a>）而实现的一个用BIO实现的RPC示例：<a href="http://friendship316.github.io/2018/04/07/rpcSimpleRecord/" target="_blank" rel="external">RPC原理简析</a>，这里使用的是BIO的socket和ServerSocket实现通讯，用流来写入写出数据。BIO的完整连接示意图如下：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3727888-76b1222bc2d3a0c3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="完整BIO连接示意图"></p>
 <h4 id="缺陷一、IO阻塞"><a href="#缺陷一、IO阻塞" class="headerlink" title="缺陷一、IO阻塞"></a>缺陷一、IO阻塞</h4><p>可以看出，在BIO中，除了建立连接比较耗时之外，在客户端将数据传输到服务端之前，服务端的IO（输入流）阻塞，然后在服务端将返回值传输回来之前，客户端的IO（输入流）阻塞。也就是说<strong>在一次RPC调用开始到完成之前，这个连接一直被此次调用所占用，但是实际上这次调用中，真正需要网络连接的只有中间的数据传输过程，在客户端写出和服务端读取并执行远端方法这两个时间点，其实网络连接是空闲的</strong>。这就是BIO连接中浪费了网络资源的地方。</p>
 <h4 id="缺陷二、大量连接"><a href="#缺陷二、大量连接" class="headerlink" title="缺陷二、大量连接"></a>缺陷二、大量连接</h4><p>由于BIO的IO阻塞，导致每次RPC调用会占用一个连接。而正因为如此，为了减少频繁创建连接消耗的时间，引入了连接池（此处的连接池指普通的HTTP连接池，非异步连接池）的概念，连接池解决了频繁创建连接的资源消耗，但是没有解决根本性的阻塞问题。而且在服务消费者（客户端）数量远大于服务提供者（服务端）数量的时候，会导致服务提供者建立了大量的连接，而本身由于硬件资源的限制，单机最大连接数是有限的（这个限制以前是1w，也就是以前的C10K问题，据说近几年已经提升至50万个连接），所以在服务消费者过多，而服务提供者数量过少的情况下，服务提供者有因为过多的连接而被拖垮的风险（这需要极大的并发数，每秒上百万次的调用）。当然，要解决这个问题，增加机器，从而增加服务提供者数量是可以解决的，但是没有充分利用单机性能。</p>
