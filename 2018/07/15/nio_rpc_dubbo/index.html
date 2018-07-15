@@ -1,0 +1,728 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NIO单一长连接——dubbo通信模型实现">
+<meta property="og:url" content="http://yoursite.com/2018/07/15/nio_rpc_dubbo/index.html">
+<meta property="og:site_name" content="xiake">
+<meta property="og:description" content="前言前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-76b1222bc2d3a0c3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-2632e469660f2db2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-2a3e097144cd7a11?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-a93021a1bbf552f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3727888-098e4b3fb2b736f2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-07-15T11:36:43.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NIO单一长连接——dubbo通信模型实现">
+<meta name="twitter:description" content="前言前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3727888-76b1222bc2d3a0c3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/07/15/nio_rpc_dubbo/"/>
+
+
+
+
+
+  <title> NIO单一长连接——dubbo通信模型实现 | xiake </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xiake</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">go go go</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/15/nio_rpc_dubbo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiake">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xiake">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                NIO单一长连接——dubbo通信模型实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T00:00:00+08:00">
+                2018-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>前一段时间看了下dubbo，原想将dubbo详细总结下来，从使用简介、SPI扩展机制、Spring的scheme扩展、启动过程、动态注册与发现、分层设计、通信设计、线程模型等方面来总结，但是越看越发现架子太大，涉及的点太广，反而RPC的思想其实已经印象深刻了，再来总结这么多的点似乎不太值得，因为不懂的东西才是最有价值的，所以有了本文，将个人认为dubbo中比较有特色的通信模型总结于此，本文是一个demo，当然不乏一些脑补的东西在里面，如您偶然阅读此文发现问题，还请不吝指出问题所在。</p>
+<h3 id="BIO通信缺陷"><a href="#BIO通信缺陷" class="headerlink" title="BIO通信缺陷"></a>BIO通信缺陷</h3><p>为了相对更好的理解dubbo这个通信模型的优势，首先需要回顾一下BIO通信的缺陷。<br>为此引用一下我之前借鉴dubbo作者梁飞的博客（<a href="http://javatar.iteye.com/blog/1123915" target="_blank" rel="external">RPC框架几行代码就够了</a>）而实现的一个用BIO实现的RPC示例：<a href="https://www.jianshu.com/p/d3c7a5bbca09" target="_blank" rel="external">RPC原理简析——三分钟看完</a>，这里使用的是BIO的socket和ServerSocket实现通讯，用流来写入写出数据。BIO的完整连接示意图如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-76b1222bc2d3a0c3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="完整BIO连接示意图"></p>
+<h4 id="缺陷一、IO阻塞"><a href="#缺陷一、IO阻塞" class="headerlink" title="缺陷一、IO阻塞"></a>缺陷一、IO阻塞</h4><p>可以看出，在BIO中，除了建立连接比较耗时之外，在客户端将数据传输到服务端之前，服务端的IO（输入流）阻塞，然后在服务端将返回值传输回来之前，客户端的IO（输入流）阻塞。也就是说<strong>在一次RPC调用开始到完成之前，这个连接一直被此次调用所占用，但是实际上这次调用中，真正需要网络连接的只有中间的数据传输过程，在客户端写出和服务端读取并执行远端方法这两个时间点，其实网络连接是空闲的</strong>。这就是BIO连接中浪费了网络资源的地方。</p>
+<h4 id="缺陷二、大量连接"><a href="#缺陷二、大量连接" class="headerlink" title="缺陷二、大量连接"></a>缺陷二、大量连接</h4><p>由于BIO的IO阻塞，导致每次RPC调用会占用一个连接。而正因为如此，为了减少频繁创建连接消耗的时间，引入了连接池（此处的连接池指普通的HTTP连接池，非异步连接池）的概念，连接池解决了频繁创建连接的资源消耗，但是没有解决根本性的阻塞问题。而且在服务消费者（客户端）数量远大于服务提供者（服务端）数量的时候，会导致服务提供者建立了大量的连接，而本身由于硬件资源的限制，单机最大连接数是有限的（这个限制以前是1w，也就是以前的C10K问题，据说近几年已经提升至50万个连接），所以在服务消费者过多，而服务提供者数量过少的情况下，服务提供者有因为过多的连接而被拖垮的风险（这需要极大的并发数，每秒上百万次的调用）。当然，要解决这个问题，增加机器，从而增加服务提供者数量是可以解决的，但是没有充分利用单机性能。</p>
+<p>建立大量连接的另一个弊端，是操作系统频繁的线程上下文切换，因为连接数过多，线程切换频繁，会消耗大量的资源，而且这些切换可能不是必要的。比如当前建立了大量的连接，可能大部分处于阻塞状态，根本没有挨个挨个切换的必要。但是因为操作系统任务调度时并不会忽略阻塞状态的线程，所以造成浪费。</p>
+<h3 id="NIO单一长连接实现分析"><a href="#NIO单一长连接实现分析" class="headerlink" title="NIO单一长连接实现分析"></a>NIO单一长连接实现分析</h3><h4 id="长连接宏观简介"><a href="#长连接宏观简介" class="headerlink" title="长连接宏观简介"></a>长连接宏观简介</h4><p>长连接其实不算NIO这里的特点，因为BIO也可以实现长连接（每次写完数据之后手动写入结束符而不关闭流就可以了），而且连接池一般也是使用的长连接方式。</p>
+<p>NIO真正解决的是阻塞问题，因为阻塞问题解决了，所以也就不需要大量连接了。由于篇幅问题，此处不讨论NIO的细节（API），从相对宏观的角度介绍大体角色和调用方式，NIO三种角色示意如下图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-2632e469660f2db2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="NIO角色示意图"></p>
+<p>NIO由三种角色组成，Selector、SocketChannel、Buffer。</p>
+<p><strong>SocketChannel</strong>相当于BIO中的Socket，分为SocketChannel和ServerSocketChannel两种，是真正建立连接并传输数据的管道。这个管道不同于BIO的Socket的点就是，这个管道可以被多个线程共用，线程A使用这个管道写出数据了之后，线程B还可以使用这个管道写出数据，不再被某一次调用所独占。所以就可以不需要像BIO一样建立那么多的连接，一个客户端的一个连接就够了（当然，实际应用中因为机器都是多核，实际上建立核数个连接个人感觉是比较好的）。</p>
+<p><strong>Buffer</strong>是用来与SocketChannel互通数据的对象，本质上是一块内存区域。SocketChannel是不支持直接读写数据的，所有的读写操作必须通过Buffer来实现。值得一提的是，我们经常说在JVM中有的时候会使用虚拟机之外的内存，说的就是NIO中的Buffer，在分配内存的时候可以选择使用虚拟机外内存，减少数据的复制。</p>
+<p><strong>Selector</strong>是用来监控SocketChannel的事件的，其实是实现非阻塞的关键。NIO是基于事件的，将BIO中的流式传输改为了事件机制。BIO中，一个连接拥有一个输入／输出流，只要数据传输完成，流就可以读取数据。在NIO中，Selector定义了四种事件，OP_READ、OP_WRITE、OP_CONNECT、OP_ACCEPT。当服务端或者客户端收到写入完成的一次数据时，会触发OP_READ事件，此时可以从连接中读取数据。同理，当可以往连接中写入数据的时候，触发OP_WRITE事件（但是一般情况下这个事件没有必要，因为连接一般都是可写的）。客户端与服务端建立连接的时候，客户端会收到OP_CONNECT事件，而服务端会触发OP_ACCEPT事件。通过这一系列事件将数据的发送与读写解耦，实现异步调用。将一个SocketChannel+一个事件绑定在一个Selector上，Selector本质上是轮询每一个SocketChannel，如果没有事件触发，那么线程阻塞，如果有事件触发，返回对应的SocketChannel，以便进行后续的处理。</p>
+<h4 id="使用NIO设计RPC调用分析"><a href="#使用NIO设计RPC调用分析" class="headerlink" title="使用NIO设计RPC调用分析"></a>使用NIO设计RPC调用分析</h4><p>前面提到，由于NIO的SocketChannel是非阻塞的，所以不再需要连接池，使用一个连接就够了。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-2a3e097144cd7a11?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="NIO单一长连接RPC线程模型"></p>
+<p>但是如果真的使用NIO来进行RPC调用的话，会有数据和调用方对应不上的问题，如下图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-a93021a1bbf552f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="NIO异步顺序问题"></p>
+<p>如上图所示，如果多个线程共用一个连接，那么每个线程调用之后返回的顺序是不可控的，所以有可能先发出数据的反而后得到返回值，这就使得数据对应不上了。个人觉得因为这一点，NIO及其适合聊天室类型的设计，因为每个聊天方都是一个单独的SocketChannel连接，而此时并没有顺序问题。</p>
+<p>但是对RPC调用来说，每次调用的返回值必须与调用方对应上，为此，Dubbo的设计是给每个请求设计一个请求id，在发送请求与发送返回值时都带上这个id。详细思路如下图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3727888-098e4b3fb2b736f2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="NIO单一长连接的RPC设计"></p>
+<p>业务线程在发出请求之前，需要存储一个请求对象，同时挂起相应的义务线程（挂起不会被任务调度，所以不存在线程切换消耗），这个请求对象包含了此次请求的id，然后在获取服务端返回的数据的时候，解析出这个id，通过这个id取出请求对象，并唤醒对应的线程。</p>
+<h3 id="NIO单一长连接实现demo"><a href="#NIO单一长连接实现demo" class="headerlink" title="NIO单一长连接实现demo"></a>NIO单一长连接实现demo</h3><p>废话了这么多，终于可以上代码了，我这里服务端使用了线程池去执行远端方法，使得真正的服务端线程只需要读取数据就可以了。可能作为demo来讲，写的有些复杂，但是理解的时候以RpcNioConsumer和RpcNioProvider作为入口就比较好梳理了。NIO的主要实现在RpcNioMultClient和RpcNioMultServer中。</p>
+<h4 id="工具类"><a href="#工具类" class="headerlink" title="工具类"></a>工具类</h4><p>序列化／反序列化工具类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.common;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.ByteArrayInputStream;</div><div class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</div><div class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-06-27 22:03</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SerializeUtil</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] serialize(Object obj) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            ByteArrayOutputStream bos = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">            ObjectOutputStream oos = <span class="keyword">new</span> ObjectOutputStream(bos);</div><div class="line">            oos.writeObject(obj);</div><div class="line">            oos.flush();</div><div class="line">            <span class="keyword">byte</span>[] bytes = bos.toByteArray();</div><div class="line">            <span class="keyword">return</span> bytes;</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"序列化对象出错！"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">unSerialize</span><span class="params">(<span class="keyword">byte</span>[] bytes)</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            ByteArrayInputStream bis = <span class="keyword">new</span> ByteArrayInputStream(bytes);</div><div class="line">            ObjectInputStream ois = <span class="keyword">new</span> ObjectInputStream(bis);</div><div class="line">            <span class="keyword">return</span> ois.readObject();</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"反序列化出错！"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</div><div class="line">            System.out.println(<span class="string">"反序列化出错！"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="服务端代码"><a href="#服务端代码" class="headerlink" title="服务端代码"></a>服务端代码</h4><p>RPC调用的接口：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.service;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-04-01 20:35</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">HelloService</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(String name)</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端的接口实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.service;</div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-04-01 20:40</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceImpl</span> <span class="keyword">implements</span> <span class="title">HelloService</span> </span>&#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="string">"hello "</span> + name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端，用于与客户端建立连接、读取数据：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.niomultipart;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</div><div class="line"><span class="keyword">import</span> java.lang.reflect.Method;</div><div class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</div><div class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</div><div class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</div><div class="line"><span class="keyword">import</span> java.nio.channels.Selector;</div><div class="line"><span class="keyword">import</span> java.nio.channels.ServerSocketChannel;</div><div class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</div><div class="line"><span class="keyword">import</span> java.util.Iterator;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.common.BeanContainer;</div><div class="line"><span class="keyword">import</span> com.liepin.common.RequstMultObject;</div><div class="line"><span class="keyword">import</span> com.liepin.common.SerializeUtil;</div><div class="line"><span class="keyword">import</span> com.liepin.common.ThreadPoolUtil;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 11:38</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNioMultServer</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">// 通道管理器</span></div><div class="line">    <span class="keyword">private</span> Selector selector;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        RpcNioMultServer server = <span class="keyword">new</span> RpcNioMultServer();</div><div class="line">        server.initServer(<span class="number">8080</span>);</div><div class="line">        server.listen();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line"><span class="comment">     * 获得一个ServerSocket通道，并对该通道做一些初始化的工作</span></div><div class="line"><span class="comment">     *</span></div><div class="line"><span class="comment">     * <span class="doctag">@param</span> port</span></div><div class="line"><span class="comment">     *            绑定的端口号</span></div><div class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></div><div class="line"><span class="comment">     */</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initServer</span><span class="params">(<span class="keyword">int</span> port)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="comment">// 获得一个ServerSocket通道</span></div><div class="line">        ServerSocketChannel serverChannel = ServerSocketChannel.open();</div><div class="line">        <span class="comment">// 设置通道为非阻塞</span></div><div class="line">        serverChannel.configureBlocking(<span class="keyword">false</span>);</div><div class="line">        <span class="comment">// 将该通道对应的ServerSocket绑定到port端口</span></div><div class="line">        serverChannel.socket().bind(<span class="keyword">new</span> InetSocketAddress(port));</div><div class="line">        <span class="comment">// 获得一个通道管理器</span></div><div class="line">        <span class="keyword">this</span>.selector = Selector.open();</div><div class="line">        <span class="comment">// 将通道管理器和该通道绑定，并为该通道注册SelectionKey.OP_ACCEPT事件,注册该事件后，</span></div><div class="line">        <span class="comment">// 当该事件到达时，selector.select()会返回，如果该事件没到达selector.select()会一直阻塞。</span></div><div class="line">        serverChannel.register(selector, SelectionKey.OP_ACCEPT);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">listen</span><span class="params">()</span> </span>&#123;</div><div class="line">        System.out.println(<span class="string">"服务端启动成功！"</span>);</div><div class="line">        <span class="comment">// 轮询访问selector</span></div><div class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="comment">// 当注册的事件到达时，方法返回；否则,该方法会一直阻塞</span></div><div class="line">                selector.select();</div><div class="line">                <span class="comment">// 获得selector中选中的项的迭代器，选中的项为注册的事件</span></div><div class="line">                Iterator ite = selector.selectedKeys().iterator();</div><div class="line">                <span class="keyword">while</span> (ite.hasNext()) &#123;</div><div class="line">                    SelectionKey key = (SelectionKey) ite.next();</div><div class="line">                    <span class="comment">// 删除已选的key,以防重复处理</span></div><div class="line">                    ite.remove();</div><div class="line">                    <span class="comment">// 客户端请求连接事件</span></div><div class="line">                    <span class="keyword">if</span> (key.isAcceptable()) &#123;</div><div class="line">                        ServerSocketChannel server = (ServerSocketChannel) key.channel();</div><div class="line">                        <span class="comment">// 获得和客户端连接的通道</span></div><div class="line">                        SocketChannel channel = server.accept();</div><div class="line">                        <span class="comment">// 设置成非阻塞</span></div><div class="line">                        channel.configureBlocking(<span class="keyword">false</span>);</div><div class="line"></div><div class="line">                        <span class="comment">// 在和客户端连接成功之后，为了可以接收到客户端的信息，需要给通道设置读的权限。</span></div><div class="line">                        channel.register(<span class="keyword">this</span>.selector, SelectionKey.OP_READ);</div><div class="line"></div><div class="line">                        <span class="comment">// 获得了可读的事件</span></div><div class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</div><div class="line">                        SocketChannel channel = (SocketChannel) key.channel();</div><div class="line">                        <span class="keyword">byte</span>[] bytes = readMsgFromClient(channel);</div><div class="line">                        <span class="keyword">if</span> (bytes != <span class="keyword">null</span> &amp;&amp; bytes.length &gt; <span class="number">0</span>) &#123;</div><div class="line">                            <span class="comment">// 读取之后将任务放入线程池异步返回</span></div><div class="line">                            RpcNioMultServerTask task = <span class="keyword">new</span> RpcNioMultServerTask(bytes, channel);</div><div class="line">                            ThreadPoolUtil.addTask(task);</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">byte</span>[] readMsgFromClient(SocketChannel channel) &#123;</div><div class="line">        ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">4</span>);</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="comment">// 首先读取消息头（自己设计的协议头，此处是消息体的长度）</span></div><div class="line">            <span class="keyword">int</span> headCount = channel.read(byteBuffer);</div><div class="line">            <span class="keyword">if</span> (headCount &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line">            byteBuffer.flip();</div><div class="line">            <span class="keyword">int</span> length = byteBuffer.getInt();</div><div class="line">            <span class="comment">// 读取消息体</span></div><div class="line">            byteBuffer = ByteBuffer.allocate(length);</div><div class="line">            <span class="keyword">int</span> bodyCount = channel.read(byteBuffer);</div><div class="line">            <span class="keyword">if</span> (bodyCount &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> byteBuffer.array();</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"读取数据异常"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>线程池工具类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.common;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.concurrent.LinkedBlockingDeque;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.niomultipart.RpcNioMultServerTask;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 21:39</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadPoolUtil</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadPoolExecutor executor;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (executor == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (ThreadPoolUtil.class) &#123;</div><div class="line">                executor = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">10</span>, <span class="number">20</span>, <span class="number">200</span>, TimeUnit.MILLISECONDS, <span class="keyword">new</span> LinkedBlockingDeque&lt;&gt;());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addTask</span><span class="params">(RpcNioMultServerTask task)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (executor == <span class="keyword">null</span>) &#123;</div><div class="line">            init();</div><div class="line">        &#125;</div><div class="line">        executor.execute(task);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>用于获取数据执行远端方法的线程池任务类：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.niomultipart;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</div><div class="line"><span class="keyword">import</span> java.lang.reflect.Method;</div><div class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</div><div class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.common.BeanContainer;</div><div class="line"><span class="keyword">import</span> com.liepin.common.RequstMultObject;</div><div class="line"><span class="keyword">import</span> com.liepin.common.SerializeUtil;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * 服务端线程池任务</span></div><div class="line"><span class="comment"> * </span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 21:18</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNioMultServerTask</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">byte</span>[] bytes;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> SocketChannel channel;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RpcNioMultServerTask</span><span class="params">(<span class="keyword">byte</span>[] bytes, SocketChannel channel)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.bytes = bytes;</div><div class="line">        <span class="keyword">this</span>.channel = channel;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (bytes != <span class="keyword">null</span> &amp;&amp; bytes.length &gt; <span class="number">0</span> &amp;&amp; channel != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">// 反序列化</span></div><div class="line">            RequstMultObject requstMultObject = (RequstMultObject) SerializeUtil.unSerialize(bytes);</div><div class="line">            <span class="comment">// 调用服务并序列化结果然后返回</span></div><div class="line">            requestHandle(requstMultObject, channel);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">requestHandle</span><span class="params">(RequstMultObject requstObject, SocketChannel channel)</span> </span>&#123;</div><div class="line">        Long requestId = requstObject.getRequestId();</div><div class="line">        Object obj = BeanContainer.getBean(requstObject.getCalzz());</div><div class="line">        String methodName = requstObject.getMethodName();</div><div class="line">        Class&lt;?&gt;[] parameterTypes = requstObject.getParamTypes();</div><div class="line">        Object[] arguments = requstObject.getArgs();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            Method method = obj.getClass().getMethod(methodName, parameterTypes);</div><div class="line">            String result = (String) method.invoke(obj, arguments);</div><div class="line">            <span class="keyword">byte</span>[] bytes = SerializeUtil.serialize(result);</div><div class="line">            ByteBuffer buffer = ByteBuffer.allocate(bytes.length + <span class="number">12</span>);</div><div class="line">            <span class="comment">// 为了便于客户端获得请求ID，直接将id写在头部（这样客户端直接解析即可获得，不需要将所有消息反序列化才能得到）</span></div><div class="line">            <span class="comment">// 然后写入消息题的长度，最后写入返回内容</span></div><div class="line">            buffer.putLong(requestId);</div><div class="line">            buffer.putInt(bytes.length);</div><div class="line">            buffer.put(bytes);</div><div class="line">            buffer.flip();</div><div class="line">            channel.write(buffer);</div><div class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> SocketChannel <span class="title">getChannel</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> channel;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setChannel</span><span class="params">(SocketChannel channel)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.channel = channel;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端服务发布：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.common.BeanContainer;</div><div class="line"><span class="keyword">import</span> com.liepin.niomultipart.RpcNioMultServer;</div><div class="line"><span class="keyword">import</span> com.liepin.service.HelloService;</div><div class="line"><span class="keyword">import</span> com.liepin.service.HelloServiceImpl;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-06-28 23:24</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNioProvider</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="comment">// 将服务放进bean容器</span></div><div class="line">        HelloService helloService = <span class="keyword">new</span> HelloServiceImpl();</div><div class="line">        BeanContainer.addBean(HelloService.class, helloService);</div><div class="line">        <span class="comment">// 启动NIO服务端</span></div><div class="line">        startMultRpcNioServer();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">startMultRpcNioServer</span><span class="params">()</span> </span>&#123;</div><div class="line">        Runnable r = () -&gt; &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                RpcNioMultServer.start();</div><div class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;;</div><div class="line">        Thread t = <span class="keyword">new</span> Thread(r);</div><div class="line">        t.start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端服务发布时使用的bean容器：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.common;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-06-28 07:52</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BeanContainer</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ConcurrentHashMap&lt;Class&lt;?&gt;, Object&gt; container = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">addBean</span><span class="params">(Class&lt;?&gt; clazz, Object object)</span> </span>&#123;</div><div class="line">        container.put(clazz, object);</div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getBean</span><span class="params">(Class&lt;?&gt; clazz)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> container.get(clazz);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="客户端代码"><a href="#客户端代码" class="headerlink" title="客户端代码"></a>客户端代码</h4><p>客户端：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.niomultipart;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</div><div class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</div><div class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</div><div class="line"><span class="keyword">import</span> java.nio.channels.Selector;</div><div class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</div><div class="line"><span class="keyword">import</span> java.util.Iterator;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.common.RpcContainer;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 01:12</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNioMultClient</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RpcNioMultClient rpcNioClient;</div><div class="line"></div><div class="line">    <span class="comment">// 通道管理器</span></div><div class="line">    <span class="keyword">private</span> Selector selector;</div><div class="line"></div><div class="line">    <span class="comment">// 通道</span></div><div class="line">    <span class="keyword">private</span> SocketChannel channel;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> String serverIp = <span class="string">"localhost"</span>;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = <span class="number">8080</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">RpcNioMultClient</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="comment">// 初始化client</span></div><div class="line">        initClient();</div><div class="line">        Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                listen();</div><div class="line">            &#125;</div><div class="line">        &#125;;</div><div class="line">        Thread t = <span class="keyword">new</span> Thread(runnable);</div><div class="line">        t.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RpcNioMultClient <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (rpcNioClient == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (RpcNioMultClient.class) &#123;</div><div class="line">                <span class="keyword">if</span> (rpcNioClient == <span class="keyword">null</span>) &#123;</div><div class="line">                    rpcNioClient = <span class="keyword">new</span> RpcNioMultClient();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> rpcNioClient;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initClient</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="comment">// 打开一个通道</span></div><div class="line">            channel = SocketChannel.open();</div><div class="line">            <span class="comment">// 设置为非阻塞通道（异步）</span></div><div class="line">            channel.configureBlocking(<span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 获得通道管理器，用于监听通道事件</span></div><div class="line">            selector = Selector.open();</div><div class="line">            <span class="comment">// 建立连接</span></div><div class="line">            channel.connect(<span class="keyword">new</span> InetSocketAddress(serverIp, port));</div><div class="line">            <span class="comment">// 由于是非阻塞的，所以有可能连接并未建立完成，调用finishConnect完成连接</span></div><div class="line">            <span class="keyword">if</span> (channel.isConnectionPending()) &#123;</div><div class="line">                channel.finishConnect();</div><div class="line">            &#125;</div><div class="line">            System.out.println(<span class="string">"客户端初始化完成，建立连接完成"</span>);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">listen</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                <span class="comment">// 绑定到通道管理器,监听可读事件，因为客户端只需要从服务端获得数据然后读取，所以只需要监听READ事件</span></div><div class="line">                channel.register(selector, SelectionKey.OP_READ);</div><div class="line">                <span class="comment">// 开始轮询READ事件</span></div><div class="line">                selector.select();</div><div class="line">                Iterator ite = selector.selectedKeys().iterator();</div><div class="line">                <span class="keyword">while</span> (ite.hasNext()) &#123;</div><div class="line">                    SelectionKey key = (SelectionKey) ite.next();</div><div class="line">                    <span class="comment">// 删除已选的key,以防重复处理</span></div><div class="line">                    ite.remove();</div><div class="line">                    <span class="keyword">if</span> (key.isReadable()) &#123;</div><div class="line">                        <span class="comment">// 读取信息</span></div><div class="line">                        readMsgFromServer();</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"客户端建立连接失败"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">sendMsg2Server</span><span class="params">(<span class="keyword">byte</span>[] bytes)</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            ByteBuffer buffer = ByteBuffer.allocate(bytes.length + <span class="number">4</span>);</div><div class="line">            <span class="comment">// 放入消息长度，然后放入消息体</span></div><div class="line">            buffer.putInt(bytes.length);</div><div class="line">            buffer.put(bytes);</div><div class="line">            <span class="comment">// 写完之后buffer设置为可读状态</span></div><div class="line">            buffer.flip();</div><div class="line">            <span class="comment">// 写出消息</span></div><div class="line">            channel.write(buffer);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"客户端写出消息失败！"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readMsgFromServer</span><span class="params">()</span> </span>&#123;</div><div class="line">        ByteBuffer byteBuffer;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="comment">// 首先读取请求id</span></div><div class="line">            byteBuffer = ByteBuffer.allocate(<span class="number">8</span>);</div><div class="line">            <span class="keyword">int</span> readIdCount = channel.read(byteBuffer);</div><div class="line">            <span class="keyword">if</span> (readIdCount &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            byteBuffer.flip();</div><div class="line">            Long requsetId = byteBuffer.getLong();</div><div class="line"></div><div class="line">            <span class="comment">// 读取返回值长度</span></div><div class="line">            byteBuffer = ByteBuffer.allocate(<span class="number">4</span>);</div><div class="line">            <span class="keyword">int</span> readHeadCount = channel.read(byteBuffer);</div><div class="line">            <span class="keyword">if</span> (readHeadCount &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 将buffer切换为待读取状态</span></div><div class="line">            byteBuffer.flip();</div><div class="line">            <span class="keyword">int</span> length = byteBuffer.getInt();</div><div class="line"></div><div class="line">            <span class="comment">// 读取消息体</span></div><div class="line">            byteBuffer = ByteBuffer.allocate(length);</div><div class="line">            <span class="keyword">int</span> readBodyCount = channel.read(byteBuffer);</div><div class="line">            <span class="keyword">if</span> (readBodyCount &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">byte</span>[] bytes = byteBuffer.array();</div><div class="line"></div><div class="line">            <span class="comment">// 将返回值放入指定容器</span></div><div class="line">            RpcContainer.addResponse(requsetId, bytes);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            System.out.println(<span class="string">"读取数据异常"</span>);</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>请求时的数据结构<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line">package com.liepin.common;</div><div class="line"></div><div class="line">import java.io.Serializable;</div><div class="line"></div><div class="line">/**</div><div class="line"> * @author: lifs</div><div class="line"> * @create: 2018-07-01 11:10</div><div class="line"> **/</div><div class="line">public class RequstMultObject implements Serializable &#123;</div><div class="line"></div><div class="line">    private static final long serialVersionUID = 3132836600205356306L;</div><div class="line"></div><div class="line">    // 请求id</div><div class="line">    private Long requestId;</div><div class="line"></div><div class="line">    // 服务提供者接口</div><div class="line">    private Class&lt;?&gt; calzz;</div><div class="line"></div><div class="line">    // 服务的方法名称</div><div class="line">    private String methodName;</div><div class="line"></div><div class="line">    // 参数类型</div><div class="line">    private Class&lt;?&gt;[] paramTypes;</div><div class="line"></div><div class="line">    // 参数</div><div class="line">    private Object[] args;</div><div class="line"></div><div class="line">    public RequstMultObject(Class&lt;?&gt; calzz, String methodName, Class&lt;?&gt;[] paramTypes, Object[] args) &#123;</div><div class="line">        this.calzz = calzz;</div><div class="line">        this.methodName = methodName;</div><div class="line">        this.paramTypes = paramTypes;</div><div class="line">        this.args = args;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Long getRequestId() &#123;</div><div class="line">        return requestId;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setRequestId(Long requstId) &#123;</div><div class="line">        this.requestId = requstId;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Class&lt;?&gt; getCalzz() &#123;</div><div class="line">        return calzz;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setCalzz(Class&lt;?&gt; calzz) &#123;</div><div class="line">        this.calzz = calzz;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public String getMethodName() &#123;</div><div class="line">        return methodName;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setMethodName(String methodName) &#123;</div><div class="line">        this.methodName = methodName;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Class&lt;?&gt;[] getParamTypes() &#123;</div><div class="line">        return paramTypes;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setParamTypes(Class&lt;?&gt;[] paramTypes) &#123;</div><div class="line">        this.paramTypes = paramTypes;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Object[] getArgs() &#123;</div><div class="line">        return args;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setArgs(Object[] args) &#123;</div><div class="line">        this.args = args;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>请求数据获取类，用来挂起和唤醒挂起的线程：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.common;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.concurrent.locks.Condition;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.locks.Lock;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.locks.ReentrantLock;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 16:53</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcResponseFuture</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Lock lock = <span class="keyword">new</span> ReentrantLock();</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Condition condition = lock.newCondition();</div><div class="line">    <span class="keyword">private</span> Long requstId;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RpcResponseFuture</span><span class="params">(Long requstId)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.requstId = requstId;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">byte</span>[] get() &#123;</div><div class="line">        <span class="keyword">byte</span>[] bytes = RpcContainer.getResponse(requstId);</div><div class="line">        <span class="keyword">if</span> (bytes == <span class="keyword">null</span> || bytes.length &lt; <span class="number">0</span>) &#123;</div><div class="line">            lock.lock();</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                System.out.println(<span class="string">"请求id:"</span> + requstId + <span class="string">",请求结果尚未返回，线程挂起"</span>);</div><div class="line">                condition.await();</div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125; <span class="keyword">finally</span> &#123;</div><div class="line">                lock.unlock();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        System.out.println(<span class="string">"请求id:"</span> + requstId + <span class="string">",请求结果返回，线程挂起结束"</span>);</div><div class="line">        <span class="keyword">return</span> RpcContainer.getResponse(requstId);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">rpcIsDone</span><span class="params">()</span> </span>&#123;</div><div class="line">        lock.lock();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            condition.signal();</div><div class="line">        &#125; <span class="keyword">finally</span> &#123;</div><div class="line">            lock.unlock();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getRequstId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> requstId;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setRequstId</span><span class="params">(Long requstId)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.requstId = requstId;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>RPC容器 用来存储发送RPC请求时的请求对象，以及存储返回值<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.common;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicLong;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 10:58</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcContainer</span> </span>&#123;</div><div class="line">    <span class="comment">//返回值容器</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ConcurrentHashMap&lt;Long, <span class="keyword">byte</span>[]&gt; responseContainer = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</div><div class="line">    <span class="comment">//请求对象容器</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ConcurrentHashMap&lt;Long, RpcResponseFuture&gt; requestFuture = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</div><div class="line">    <span class="comment">//请求id</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> AtomicLong requstId = <span class="keyword">new</span> AtomicLong(<span class="number">0</span>);</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Long <span class="title">getRequestId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> requstId.getAndIncrement();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addResponse</span><span class="params">(Long requestId, <span class="keyword">byte</span>[] responseBytes)</span> </span>&#123;</div><div class="line">        responseContainer.put(requestId, responseBytes);</div><div class="line">        RpcResponseFuture responseFuture = requestFuture.get(requestId);</div><div class="line">        responseFuture.rpcIsDone();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] getResponse(Long requestId) &#123;</div><div class="line">        <span class="keyword">return</span> responseContainer.get(requestId);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addRequstFuture</span><span class="params">(RpcResponseFuture rpcResponseFuture)</span> </span>&#123;</div><div class="line">        requestFuture.put(rpcResponseFuture.getRequstId(), rpcResponseFuture);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RpcResponseFuture <span class="title">getRpcRequstFutue</span><span class="params">(Long requestId)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> requestFuture.get(requestId);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">removeResponseAndFuture</span><span class="params">(Long requestId)</span> </span>&#123;</div><div class="line">        responseContainer.remove(requestId);</div><div class="line">        requestFuture.remove(requestId);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>RPC代理工厂类：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.proxy;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.niomultipart.RpcNIoMultHandler;</div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-06-28 23:35</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcProxyFactory</span> </span>&#123;</div><div class="line">    <span class="comment">/**</span></div><div class="line"><span class="comment">     * 多线程环境代理对象</span></div><div class="line"><span class="comment">     * </span></div><div class="line"><span class="comment">     * <span class="doctag">@param</span> interfaceClass</span></div><div class="line"><span class="comment">     * <span class="doctag">@return</span> T</span></div><div class="line"><span class="comment">     * <span class="doctag">@throws</span> BizException</span></div><div class="line"><span class="comment">     * <span class="doctag">@createTime</span>：2018/7/1</span></div><div class="line"><span class="comment">     * <span class="doctag">@author</span>: shakeli</span></div><div class="line"><span class="comment">     */</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">getMultService</span><span class="params">(Class&lt;T&gt; interfaceClass)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), <span class="keyword">new</span> Class[] &#123; interfaceClass &#125;,</div><div class="line">                <span class="keyword">new</span> RpcNIoMultHandler());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>实际代理类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.niomultipart;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</div><div class="line"><span class="keyword">import</span> java.lang.reflect.Method;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.common.RequstMultObject;</div><div class="line"><span class="keyword">import</span> com.liepin.common.RpcContainer;</div><div class="line"><span class="keyword">import</span> com.liepin.common.RpcResponseFuture;</div><div class="line"><span class="keyword">import</span> com.liepin.common.SerializeUtil;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-07-01 11:41</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNIoMultHandler</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</div><div class="line">        <span class="comment">// 获得请求id</span></div><div class="line">        Long responseId = RpcContainer.getRequestId();</div><div class="line">        <span class="comment">// 封装请求对象</span></div><div class="line">        RequstMultObject requstMultObject = <span class="keyword">new</span> RequstMultObject(method.getDeclaringClass(), method.getName(),</div><div class="line">                method.getParameterTypes(), args);</div><div class="line">        requstMultObject.setRequestId(responseId);</div><div class="line"></div><div class="line">        <span class="comment">// 封装设置rpcResponseFuture，主要用于获取返回值</span></div><div class="line">        RpcResponseFuture rpcResponseFuture = <span class="keyword">new</span> RpcResponseFuture(responseId);</div><div class="line">        RpcContainer.addRequstFuture(rpcResponseFuture);</div><div class="line"></div><div class="line">        <span class="comment">// 序列化</span></div><div class="line">        <span class="keyword">byte</span>[] requstBytes = SerializeUtil.serialize(requstMultObject);</div><div class="line">        <span class="comment">// 发送请求信息</span></div><div class="line">        RpcNioMultClient rpcNioMultClient = RpcNioMultClient.getInstance();</div><div class="line">        rpcNioMultClient.sendMsg2Server(requstBytes);</div><div class="line"></div><div class="line">        <span class="comment">// 从ResponseContainer获取返回值</span></div><div class="line">        <span class="keyword">byte</span>[] responseBytes = rpcResponseFuture.get();</div><div class="line">        <span class="keyword">if</span> (requstBytes != <span class="keyword">null</span>) &#123;</div><div class="line">            RpcContainer.removeResponseAndFuture(responseId);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 反序列化获得结果</span></div><div class="line">        Object result = SerializeUtil.unSerialize(responseBytes);</div><div class="line">        System.out.println(<span class="string">"请求id："</span> + responseId + <span class="string">" 结果："</span> + result);</div><div class="line">        <span class="keyword">return</span> result;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>客户端RPC调用：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.liepin.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.liepin.proxy.RpcProxyFactory;</div><div class="line"><span class="keyword">import</span> com.liepin.service.HelloService;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * <span class="doctag">@author</span>: lifs</span></div><div class="line"><span class="comment"> * <span class="doctag">@create</span>: 2018-06-28 23:34</span></div><div class="line"><span class="comment"> **/</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcNioConsumer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        multipartRpcNio();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line"><span class="comment">     * 多线程IO调用示例</span></div><div class="line"><span class="comment">     * </span></div><div class="line"><span class="comment">     * <span class="doctag">@param</span></span></div><div class="line"><span class="comment">     * <span class="doctag">@return</span> void</span></div><div class="line"><span class="comment">     * <span class="doctag">@throws</span> BizException</span></div><div class="line"><span class="comment">     * <span class="doctag">@createTime</span>：2018/7/1</span></div><div class="line"><span class="comment">     * <span class="doctag">@author</span>: shakeli</span></div><div class="line"><span class="comment">     */</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">multipartRpcNio</span><span class="params">()</span> </span>&#123;</div><div class="line">        HelloService proxy = RpcProxyFactory.getMultService(HelloService.class);</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> j = I;</div><div class="line">            Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                    String result = proxy.sayHello(<span class="string">"world!"</span>);</div><div class="line">                &#125;</div><div class="line">            &#125;;</div><div class="line">            Thread t = <span class="keyword">new</span> Thread(runnable);</div><div class="line">            t.start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/08/dubbo_use_demo_zookeeper/" rel="next" title="dubbo使用入门-使用zookeeper作为注册中心">
+                <i class="fa fa-chevron-left"></i> dubbo使用入门-使用zookeeper作为注册中心
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG"
+               alt="xiake" />
+          <p class="site-author-name" itemprop="name">xiake</p>
+           
+              <p class="site-description motion-element" itemprop="description">just some note</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/28fe84130b9c" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BIO通信缺陷"><span class="nav-number">2.</span> <span class="nav-text">BIO通信缺陷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#缺陷一、IO阻塞"><span class="nav-number">2.1.</span> <span class="nav-text">缺陷一、IO阻塞</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缺陷二、大量连接"><span class="nav-number">2.2.</span> <span class="nav-text">缺陷二、大量连接</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO单一长连接实现分析"><span class="nav-number">3.</span> <span class="nav-text">NIO单一长连接实现分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#长连接宏观简介"><span class="nav-number">3.1.</span> <span class="nav-text">长连接宏观简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用NIO设计RPC调用分析"><span class="nav-number">3.2.</span> <span class="nav-text">使用NIO设计RPC调用分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO单一长连接实现demo"><span class="nav-number">4.</span> <span class="nav-text">NIO单一长连接实现demo</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工具类"><span class="nav-number">4.1.</span> <span class="nav-text">工具类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务端代码"><span class="nav-number">4.2.</span> <span class="nav-text">服务端代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端代码"><span class="nav-number">4.3.</span> <span class="nav-text">客户端代码</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiake</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
