@@ -7,7 +7,7 @@ date: 2018-07-15
 
 ### BIO通信缺陷
 为了相对更好的理解dubbo这个通信模型的优势，首先需要回顾一下BIO通信的缺陷。
-为此引用一下我之前借鉴dubbo作者梁飞的博客（[RPC框架几行代码就够了](http://javatar.iteye.com/blog/1123915)）而实现的一个用BIO实现的RPC示例：[RPC原理简析——三分钟看完](https://www.jianshu.com/p/d3c7a5bbca09)，这里使用的是BIO的socket和ServerSocket实现通讯，用流来写入写出数据。BIO的完整连接示意图如下：
+为此引用一下我之前借鉴dubbo作者梁飞的博客（[RPC框架几行代码就够了](http://javatar.iteye.com/blog/1123915)）而实现的一个用BIO实现的RPC示例：[RPC原理简析](http://friendship316.github.io/2018/04/07/rpcSimpleRecord/)，这里使用的是BIO的socket和ServerSocket实现通讯，用流来写入写出数据。BIO的完整连接示意图如下：
 
 ![完整BIO连接示意图](http://upload-images.jianshu.io/upload_images/3727888-76b1222bc2d3a0c3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
