@@ -50,7 +50,7 @@ date: 2017-09-04
 #### 2、垃圾收集器
 JDK 1.7 Update 14（及以后的版本）包含了7个收集器。对于垃圾收集器的总结，粗略如下图。图中STW=StopThe World，即暂停所有工作线程。并行是指有多个线程进行垃圾收集。而并发是指垃圾收集的线程和工作线程同时运行。两个收集器中的连线是代表这两个收集器可以组合使用（开启参数见下方附录）。
 
-![多种垃圾收集器示意图](http://ouws94yej.bkt.clouddn.com/xunijilajishoujiqi.png)
+![多种垃圾收集器示意图](http://upload-images.jianshu.io/upload_images/3727888-083f2abf1f6bfe66.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 CMS（Concurrent Mark Sweep）收集器和G1（Garbage-First）收集器拥有了并发能力，所以整个收集过程比其余收集器复杂一些，标记过程分为多个阶段，特别记录一下。
 
