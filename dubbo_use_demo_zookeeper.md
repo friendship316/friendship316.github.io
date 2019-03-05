@@ -6,7 +6,7 @@ date: 2018-06-08 15:38:24
 ### 工程目录结构
 这里创建三个maven工程（此处不是web工程），dubbo-consumer作为服务消费方，dubbo-provider作为服务提供方，dubbo-interface作为公共jar包提供引用接口。如下图所示，dubbo-interface中只定义了一个接口HelloService，有一个方法sayHello。
 
-![工程目录结构](http://p9bex2mzr.bkt.clouddn.com/dubbo_projects.png)
+![工程目录结构](https://upload-images.jianshu.io/upload_images/3727888-3bb263995c3f76c6.png)
 
 ### 服务提供方
 dubbo-provider中的pom.xml加入如下依赖：
@@ -174,11 +174,11 @@ public class Consumer {
 众所周知，dubbo使用zookeeper的命名服务进行注册。这里进入zookeeper去看一看dubbo注册的znode是什么样的。
 在服务提供方和服务消费方启动之前，进入zookeeper集群(三个节点简称为zoo1、zoo2、zoo3)中的第一个节点zoo1，可以看到只有默认的节点zookeeper。
 
-![zookeeper默认节点](http://p9bex2mzr.bkt.clouddn.com/zookeeper_default_node.png)
+![zookeeper默认节点](https://upload-images.jianshu.io/upload_images/3727888-4cafaa7634863caa.png)
 
 启动provider之后：
 
-![provider](http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_znode.png)
+![provider](https://upload-images.jianshu.io/upload_images/3727888-44e7698d6ce58fa8.png)
 
 可以看到在根结点下新增了节点dubbo，然后在dubbo节点下有了HelloService节点，HelloService下面有这个服务的配置节点configurators和提供方providers，由于目前我只启动了一个服务，所以providers下面只有一个节点。这个节点的内容是一个URL（这个URL包含了服务提供方的详细信息，详细含义此处不作解读），将这个URL转义之后可以得到：
 >dubbo://192.168.0.103:20880/com.liepin.interfaces.HelloService?anyhost=true&application=demo-provider&dubbo=2.6.1&generic=false
@@ -187,7 +187,7 @@ public class Consumer {
 
 接下来我们再启动consumer（此处为了便于观察，我的consumer调用之后并未结束程序，而是在Consumer的main方法后面加上System.in.read()使其阻塞了）：
 
-![consumer](http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode.png)
+![consumer](https://upload-images.jianshu.io/upload_images/3727888-c26c01e09e1cc538.png)
 
 可以看到，启动了consumer之后，HelloService节点下新增了两个节点：consumers和routers。consumers下面也是一个URL（这个URL包含了服务消费方的详细信息，详细含义此处不作解读）：
 
@@ -198,13 +198,13 @@ public class Consumer {
 
 使用get命令查看节点数据：
 
-![查看节点数据](http://p9bex2mzr.bkt.clouddn.com/zk_dubbo_consumer_znode_info.png)
+![查看节点数据](https://upload-images.jianshu.io/upload_images/3727888-c4bd45273e723b9f.png)
 
 可以看到，内容为null，所以dubbo创建的这个节点并没有内容，只是使用了命名而已，所以称为命名服务。
 值得一提的是，这个接口下的consumer和provider都是临时节点，当这个zk会话结束之后并且在zookeeper设置的session过期时间之后，这个节点会删除。
 前面我使用System.in.read()让consumer阻塞了，接下来按任意键使其阻塞状态解除，可以看到consumers节点仍然存在，但是下面的消费者是空，说明没有任何消费者了。
 
-![consumer临时节点](http://p9bex2mzr.bkt.clouddn.com/consumer_linshi_znode.png)
+![consumer临时节点](https://upload-images.jianshu.io/upload_images/3727888-8a5657bf47a91e82.png)
 
 同样，如果取消provider的阻塞，停止服务，那么/dubbo/com.liepin.interfaces.HelloService/providers节点也不再有任何子节点。
 

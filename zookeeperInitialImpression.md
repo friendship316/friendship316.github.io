@@ -8,7 +8,7 @@ date: 2018-05-27 17:44:24
 #### znode基本特性
 zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：
 
-![zookeeper数据结构](http://p9bex2mzr.bkt.clouddn.com/znodetree.png)
+![zookeeper数据结构](https://upload-images.jianshu.io/upload_images/3727888-de9f9872f7913ad4.png)
 
 每个znode包含三部分信息：
 >1. stat. 此为状态信息, 描述该znode的版本, 权限等信息；
@@ -45,12 +45,12 @@ ZooKeeper状态的每一次改变, 都对应着一个递增的Transaction(事务
 ### 外在表现：分布式一致性
 首先，通过一个简单的演示来加深印象，在本机启动了zk伪集群，启动之后查看状态时可以看到zoo1和zoo3是follwer的角色，zoo2是leader。zoo1对应的客户端端口是2182，zoo2对应的端口是2183，zoo3对应的端口是2184。
 
-![zk伪集群](http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg)
+![zk伪集群](https://upload-images.jianshu.io/upload_images/3727888-6938c3b376da6521.jpg)
 
 然后通过` zkCli -server 127.0.0.1:2182` 命令连上zoo1，并通过` ls / `命令查看其下的节点，发现只有一个zookeeper节点，然后此时通过`create /test "测试"`命令在根目录下创建一个简单的test节点，可以看到根目录下出现了test节点。
 接下来退出zoo1并连接到集群中另外一台zoo2，可以看到zoo2下面也有test节点，同样的zoo3也有，而且内容一致，同样，我在任意一台删除test节点之后，整个集群中所有服务都会删除test节点。
 
-![zk数据一致性](http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg)
+![zk数据一致性](https://upload-images.jianshu.io/upload_images/3727888-4f56bd7bd61f8a8c.jpg)
 
 ### 内部机制：选主与广播
 #### zookeeper集群中三种角色

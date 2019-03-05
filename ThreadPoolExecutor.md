@@ -142,13 +142,13 @@ task6执行完毕
 #### 1、ThreadPoolExecutor结构
 ThreadPoolExecutor的主要结构及继承关系如下图所示：
 
-![ThreadPoolExecutor结构及继承关系](http://owrjz8s8v.bkt.clouddn.com/ThreadPoolExecutor.png)
+![ThreadPoolExecutor结构及继承关系](https://upload-images.jianshu.io/upload_images/3727888-a69cba50ddbe53b8.png)
 
 主要成员变量：任务队列——存放那些暂时无法执行的任务；工作线程池——存放当前启用的所有线程；线程工厂——创建线程；还有一些用来调度线程与任务并保证线程安全的成员。
 
 了解了ThreadPoolExecutor的主要结构，再简单梳理一下“一个传入线程池的任务能够被最终正常执行需要经过的主要流程”，方法名称前面没有“XXX.”这种标注的都是ThreadPoolExecutor的方法：
 
-![线程池主要流程](http://owrjz8s8v.bkt.clouddn.com/ThreadPoolliucheng.jpg)
+![线程池主要流程](https://upload-images.jianshu.io/upload_images/3727888-77b34beb250786f6.jpg)
 
 #### 2、ThreadPoolExecutor构造器及重要常量
 简单了解下构造器，ThreadPoolExecutor的四个构造器的源码如下：
