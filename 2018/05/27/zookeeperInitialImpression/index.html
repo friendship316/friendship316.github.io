@@ -94,14 +94,14 @@
 <meta property="og:site_name" content="xiake">
 <meta property="og:description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/znodetree.png">
-<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg">
-<meta property="og:image" content="http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg">
-<meta property="og:updated_time" content="2018-05-27T09:56:46.000Z">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-de9f9872f7913ad4.png">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-6938c3b376da6521.jpg">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-4f56bd7bd61f8a8c.jpg">
+<meta property="og:updated_time" content="2019-03-05T14:33:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper初印象">
 <meta name="twitter:description" content="炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考zookeeper安装与伪集群配置。 数据结构znode基本特性zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：  每个znode包含三部分信息：   stat. 此为状态信息, 描述该znode的版本, 权限等信息； data. 与该znode关">
-<meta name="twitter:image" content="http://p9bex2mzr.bkt.clouddn.com/znodetree.png">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3727888-de9f9872f7913ad4.png">
 
 
 
@@ -259,7 +259,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xiake">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG">
+      <meta itemprop="image" content="https://upload.jianshu.io/users/upload_avatars/3727888/f16554c6f5f4.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -328,7 +328,7 @@
       
         <p>炒鸡简单的zookeeper初印象总结。单机安装zookeeper集群请参考<a href="https://www.jianshu.com/p/f13a17e3e351" target="_blank" rel="external">zookeeper安装与伪集群配置</a>。</p>
 <h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><h4 id="znode基本特性"><a href="#znode基本特性" class="headerlink" title="znode基本特性"></a>znode基本特性</h4><p>zookeeper服务会维护一个具有层次关系的数据结构，类似于Linux文件系统。其中每一个节点称为znode，如下图所示：</p>
-<p><img src="http://p9bex2mzr.bkt.clouddn.com/znodetree.png" alt="zookeeper数据结构"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3727888-de9f9872f7913ad4.png" alt="zookeeper数据结构"></p>
 <p>每个znode包含三部分信息：</p>
 <blockquote>
 <ol>
@@ -361,9 +361,9 @@
 </ol>
 <p>zxid:<br>ZooKeeper状态的每一次改变, 都对应着一个递增的Transaction(事务) id, 该id称为zxid. 由于zxid的递增性质, 如果zxid1小于zxid2, 那么zxid1肯定先于zxid2发生. 创建任意节点, 或者更新任意节点的数据, 或者删除任意节点, 都会导致Zookeeper状态发生改变, 从而导致zxid的值增加。</p>
 <h3 id="外在表现：分布式一致性"><a href="#外在表现：分布式一致性" class="headerlink" title="外在表现：分布式一致性"></a>外在表现：分布式一致性</h3><p>首先，通过一个简单的演示来加深印象，在本机启动了zk伪集群，启动之后查看状态时可以看到zoo1和zoo3是follwer的角色，zoo2是leader。zoo1对应的客户端端口是2182，zoo2对应的端口是2183，zoo3对应的端口是2184。</p>
-<p><img src="http://p9bex2mzr.bkt.clouddn.com/zkzkRole.jpg" alt="zk伪集群"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3727888-6938c3b376da6521.jpg" alt="zk伪集群"></p>
 <p>然后通过<code>zkCli -server 127.0.0.1:2182</code> 命令连上zoo1，并通过<code>ls /</code>命令查看其下的节点，发现只有一个zookeeper节点，然后此时通过<code>create /test &quot;测试&quot;</code>命令在根目录下创建一个简单的test节点，可以看到根目录下出现了test节点。<br>接下来退出zoo1并连接到集群中另外一台zoo2，可以看到zoo2下面也有test节点，同样的zoo3也有，而且内容一致，同样，我在任意一台删除test节点之后，整个集群中所有服务都会删除test节点。</p>
-<p><img src="http://p9bex2mzr.bkt.clouddn.com/zkcreatenode.jpg" alt="zk数据一致性"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3727888-4f56bd7bd61f8a8c.jpg" alt="zk数据一致性"></p>
 <h3 id="内部机制：选主与广播"><a href="#内部机制：选主与广播" class="headerlink" title="内部机制：选主与广播"></a>内部机制：选主与广播</h3><h4 id="zookeeper集群中三种角色"><a href="#zookeeper集群中三种角色" class="headerlink" title="zookeeper集群中三种角色"></a>zookeeper集群中三种角色</h4><ol>
 <li>领导者（leader），负责进行投票的发起和决议，更新系统状态</li>
 <li>学习者（learner），包括跟随者（follower）和观察者（observer），follower用于接受客户端请求并想客户端返回结果，在选主过程中参与投票</li>
@@ -515,7 +515,7 @@
       <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="http://7xrt1z.com1.z0.glb.clouddn.com/katongtouxiang.PNG"
+               src="https://upload.jianshu.io/users/upload_avatars/3727888/f16554c6f5f4.jpg"
                alt="xiake" />
           <p class="site-author-name" itemprop="name">xiake</p>
            
