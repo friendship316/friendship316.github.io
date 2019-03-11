@@ -87,22 +87,22 @@
 
 
 
-<meta name="description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令init```1```git add . add xxx(目录名或者完整文件名)```1```git commit">
+<meta name="description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令git initgit add .git add xxx(目录名或者完整文件名)git commit -m &amp;qu">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Git使用笔记（持续记录）">
 <meta property="og:url" content="http://yoursite.com/2018/01/07/gitnote/index.html">
 <meta property="og:site_name" content="xiake">
-<meta property="og:description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令init```1```git add . add xxx(目录名或者完整文件名)```1```git commit">
+<meta property="og:description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令git initgit add .git add xxx(目录名或者完整文件名)git commit -m &amp;qu">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-1de93728534be4d1.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-478111770d4133b5.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-64a8ca71814feef3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-84b1641e033ced78.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3727888-aeeed407fa8bf6ec.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2019-03-11T15:42:20.000Z">
+<meta property="og:updated_time" content="2019-03-11T15:49:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Git使用笔记（持续记录）">
-<meta name="twitter:description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令init```1```git add . add xxx(目录名或者完整文件名)```1```git commit">
+<meta name="twitter:description" content="由于git总是有意无意的切换，经常忘记git的操作，干脆无脑的记下来，便于查看。 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。   通用命令git initgit add .git add xxx(目录名或者完整文件名)git commit -m &amp;qu">
 <meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3727888-1de93728534be4d1.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -333,15 +333,19 @@
 <li>本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。</li>
 </ul>
 <hr>
-<h2 id="通用命令"><a href="#通用命令" class="headerlink" title="通用命令"></a>通用命令</h2><figure class="highlight plain"><figcaption><span>init```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">```git add .</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>add xxx(目录名或者完整文件名)```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">```git commit -m &quot;first commit&quot;</div></pre></td></tr></table></figure>
-<p>HTTPS关联远程仓库（将远程主机命名为origin），使用用户名和密码<br><figure class="highlight plain"><figcaption><span>remote add origin</span><a href="https://github.com/xxx/xxx.git```" target="_blank" rel="external">link</a></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">SSH关联远程仓库（将远程主机命名为origin），使用RSA</div><div class="line">``` git remote add origin git@github.com:xxxx/xxxx.git</div></pre></td></tr></table></figure></p>
-<p>配置局部用户名和邮箱<br><figure class="highlight plain"><figcaption><span>config user.name "xxx"```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">```git config user.email &quot;xxx@xxx.com&quot;</div></pre></td></tr></table></figure></p>
-<p>列出已经存在的远程主机<br><figure class="highlight plain"><figcaption><span>remote```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">删除已经存在的关联的远程主机origin</div><div class="line">```git remote rm origin</div></pre></td></tr></table></figure></p>
-<p>push命令格式（将本地分支提交到远程主机的远程分支）<br><figure class="highlight plain"><figcaption><span>push <远程主机名> <本地分支名>:<远程分支名>```</远程分支名></本地分支名></远程主机名></span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">push代码到远程仓库（本地master提交到远程主机origin）</div><div class="line">```git push origin master</div></pre></td></tr></table></figure></p>
-<p>如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。<br><figure class="highlight plain"><figcaption><span>push origin :master```等同于```git push origin --delete master```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">---</div><div class="line"></div><div class="line">## IDEA中Git操作</div><div class="line">对于**“本地新建工程首次推送到远程”**和**“ IDEA拉取远程仓库已有的工程，并修改提交”**两种情况分别记录一种自己喜欢的操作</div><div class="line">#### IDEA创建工程并与远程仓库关联</div><div class="line">&gt;这种情况我倾向于使用命令，比较方便准确。而且还是倾向于使用https，因为后续提交使用IDEA可以记住用户名和密码，免去配置各种RSA。连续命令如下：</div><div class="line">```git init</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><figcaption><span>add xxxx```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">```git commit -m &quot;first commit&quot;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>remote add origin</span><a href="https://github.com/xxx/xxx.git```" target="_blank" rel="external">link</a></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">```git push -u origin master</div></pre></td></tr></table></figure>
+<h2 id="通用命令"><a href="#通用命令" class="headerlink" title="通用命令"></a>通用命令</h2><p><code>git init</code><br><code>git add .</code><br><code>git add xxx(目录名或者完整文件名)</code><br><code>git commit -m &quot;first commit&quot;</code></p>
+<p>HTTPS关联远程仓库（将远程主机命名为origin），使用用户名和密码<br><code>git remote add origin https://github.com/xxx/xxx.git</code></p>
+<p>SSH关联远程仓库（将远程主机命名为origin），使用RSA<br><code>git remote add origin git@github.com:xxxx/xxxx.git</code></p>
+<p>配置局部用户名和邮箱<br><code>git config user.name &quot;xxx&quot;</code><br><code>git config user.email &quot;xxx@xxx.com&quot;</code></p>
+<p>列出已经存在的远程主机<br><code>git remote</code></p>
+<p>删除已经存在的关联的远程主机origin<br><code>git remote rm origin</code></p>
+<p>push命令格式（将本地分支提交到远程主机的远程分支）<br><code>git push &lt;远程主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</code></p>
+<p>push代码到远程仓库（本地master提交到远程主机origin）<br><code>git push origin master</code></p>
+<p>如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。</p>
+<h2 id="git-push-origin-master等同于git-push-origin-delete-master"><a href="#git-push-origin-master等同于git-push-origin-delete-master" class="headerlink" title="git push origin :master等同于git push origin --delete master"></a><code>git push origin :master</code>等同于<code>git push origin --delete master</code></h2><h2 id="IDEA中Git操作"><a href="#IDEA中Git操作" class="headerlink" title="IDEA中Git操作"></a>IDEA中Git操作</h2><p>对于<strong>“本地新建工程首次推送到远程”</strong>和<strong>“ IDEA拉取远程仓库已有的工程，并修改提交”</strong>两种情况分别记录一种自己喜欢的操作</p>
+<h4 id="IDEA创建工程并与远程仓库关联"><a href="#IDEA创建工程并与远程仓库关联" class="headerlink" title="IDEA创建工程并与远程仓库关联"></a>IDEA创建工程并与远程仓库关联</h4><blockquote>
+<p>这种情况我倾向于使用命令，比较方便准确。而且还是倾向于使用https，因为后续提交使用IDEA可以记住用户名和密码，免去配置各种RSA。连续命令如下：<br><code>git init</code><br><code>git add xxxx</code><br><code>git commit -m &quot;first commit&quot;</code><br><code>git remote add origin https://github.com/xxx/xxx.git</code><br><code>git push -u origin master</code></p>
+</blockquote>
 <h4 id="IDEA拉取远程仓库已有的工程，并修改提交"><a href="#IDEA拉取远程仓库已有的工程，并修改提交" class="headerlink" title="IDEA拉取远程仓库已有的工程，并修改提交"></a>IDEA拉取远程仓库已有的工程，并修改提交</h4><blockquote>
 <p>这种情况我喜欢使用IDEA插件的功能，比较无脑方便</p>
 <p>首先检出工程：</p>
@@ -359,11 +363,9 @@
 <h4 id="开源码分支"><a href="#开源码分支" class="headerlink" title="开源码分支"></a>开源码分支</h4><p>把Hexo的源码（一系列markdown文件）备份到Github分支里面，思路就是在Github的博客仓库中创建一个分支，如下图：</p>
 <p><img src="https://upload-images.jianshu.io/upload_images/3727888-aeeed407fa8bf6ec.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="blog源码分支"></p>
 <p>其中master是正常的博客文件，mdfile是所有markdown的源文件，每次修改本地的时候先上传源代码到mdfile分支存储，再发布，更换电脑的时候再下载下来源文件即可（以下内容有些年久失修，可能不太靠谱，有待再次实践验证）。</p>
-<h4 id="分支开好之后，首次进入到博客根目录下："><a href="#分支开好之后，首次进入到博客根目录下：" class="headerlink" title="分支开好之后，首次进入到博客根目录下："></a>分支开好之后，首次进入到博客根目录下：</h4><figure class="highlight plain"><figcaption><span>init```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt;```git remote add origin git@github.com:xxxx/xxx.github.io.git</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>branch mdfile```(本地开一个mdfile分支)</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt;```git checkout mdfile```(切换到mdfile分支)</div><div class="line">&gt;#### 然后进入源文件目录(_post)下：</div><div class="line">&gt;```git add .</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>commit -m "this is md file"```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt;```git push origin mdfile:mdfile```(将本地的mdfile推送到orgin主机的mdfile分支，如果加上-f，则强制上传)</div><div class="line">&gt;</div><div class="line">&gt;#### 以后修改/发布博文过程（已验证）</div><div class="line">&gt;进入到源文件目录（_post）下（如果发生过分支切换则需要切换到源码分支操作）</div><div class="line">&gt;```git add .``` 或者 ```git add xxx</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>commit -m "xxx"```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&gt;```git push origin mdfile:mdfile</div></pre></td></tr></table></figure>
-<p>然后 <code>hexo d -g</code>进行更新静态文件。</p>
+<h4 id="分支开好之后，首次进入到博客根目录下："><a href="#分支开好之后，首次进入到博客根目录下：" class="headerlink" title="分支开好之后，首次进入到博客根目录下："></a>分支开好之后，首次进入到博客根目录下：</h4><p><code>git init</code><br><code>git remote add origin git@github.com:xxxx/xxx.github.io.git</code><br><code>git branch mdfile</code>(本地开一个mdfile分支)<br><code>git checkout mdfile</code>(切换到mdfile分支)</p>
+<h4 id="然后进入源文件目录-post-下："><a href="#然后进入源文件目录-post-下：" class="headerlink" title="然后进入源文件目录(_post)下："></a>然后进入源文件目录(_post)下：</h4><p><code>git add .</code><br><code>git commit -m &quot;this is md file&quot;</code><br><code>git push origin mdfile:mdfile</code>(将本地的mdfile推送到orgin主机的mdfile分支，如果加上-f，则强制上传)</p>
+<h4 id="以后修改-发布博文过程（已验证）"><a href="#以后修改-发布博文过程（已验证）" class="headerlink" title="以后修改/发布博文过程（已验证）"></a>以后修改/发布博文过程（已验证）</h4><p>进入到源文件目录（_post）下（如果发生过分支切换则需要切换到源码分支操作）<br><code>git add .</code> 或者 <code>git add xxx</code><br><code>git commit -m &quot;xxx&quot;</code><br><code>git push origin mdfile:mdfile</code><br>然后 <code>hexo d -g</code>进行更新静态文件。</p>
 </blockquote>
 
       
@@ -544,7 +546,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#通用命令"><span class="nav-number">1.</span> <span class="nav-text">通用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IDEA拉取远程仓库已有的工程，并修改提交"><span class="nav-number">1.0.1.</span> <span class="nav-text">IDEA拉取远程仓库已有的工程，并修改提交</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub的Hexo博客源码分支管理"><span class="nav-number">2.</span> <span class="nav-text">GitHub的Hexo博客源码分支管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#开源码分支"><span class="nav-number">2.0.1.</span> <span class="nav-text">开源码分支</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分支开好之后，首次进入到博客根目录下："><span class="nav-number">2.0.2.</span> <span class="nav-text">分支开好之后，首次进入到博客根目录下：</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#通用命令"><span class="nav-number">1.</span> <span class="nav-text">通用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-push-origin-master等同于git-push-origin-delete-master"><span class="nav-number">2.</span> <span class="nav-text">git push origin :master等同于git push origin --delete master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IDEA中Git操作"><span class="nav-number">3.</span> <span class="nav-text">IDEA中Git操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IDEA创建工程并与远程仓库关联"><span class="nav-number">3.0.1.</span> <span class="nav-text">IDEA创建工程并与远程仓库关联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IDEA拉取远程仓库已有的工程，并修改提交"><span class="nav-number">3.0.2.</span> <span class="nav-text">IDEA拉取远程仓库已有的工程，并修改提交</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub的Hexo博客源码分支管理"><span class="nav-number">4.</span> <span class="nav-text">GitHub的Hexo博客源码分支管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#开源码分支"><span class="nav-number">4.0.1.</span> <span class="nav-text">开源码分支</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分支开好之后，首次进入到博客根目录下："><span class="nav-number">4.0.2.</span> <span class="nav-text">分支开好之后，首次进入到博客根目录下：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#然后进入源文件目录-post-下："><span class="nav-number">4.0.3.</span> <span class="nav-text">然后进入源文件目录(_post)下：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#以后修改-发布博文过程（已验证）"><span class="nav-number">4.0.4.</span> <span class="nav-text">以后修改/发布博文过程（已验证）</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
