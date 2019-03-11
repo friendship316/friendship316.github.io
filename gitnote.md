@@ -48,7 +48,7 @@ push代码到远程仓库（本地master提交到远程主机origin）
 
 #### IDEA创建工程并与远程仓库关联
 
->这种情况我倾向于使用命令，比较方便准确。而且还是倾向于使用https，因为后续提交使用IDEA可以记住用户名和密码，免去配置各种RSA。连续命令如下：
+这种情况我倾向于使用命令，比较方便准确。而且还是倾向于使用https，因为后续提交使用IDEA可以记住用户名和密码，免去配置各种RSA。连续命令如下：
 `git init`
 `git add xxxx`
 `git commit -m "first commit"`
@@ -57,25 +57,23 @@ push代码到远程仓库（本地master提交到远程主机origin）
 
 #### IDEA拉取远程仓库已有的工程，并修改提交
 
->这种情况我喜欢使用IDEA插件的功能，比较无脑方便
->
->首先检出工程：
->
+这种情况我喜欢使用IDEA插件的功能，比较无脑方便，首先检出工程：
+
 >![从已经存在的远程仓库检出工程](https://upload-images.jianshu.io/upload_images/3727888-1de93728534be4d1.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
->
->由于我的global已经配置了另一个仓库的RSA，而这个仓库我不想添加RSA，所以使用HTTPS方式拉取。不过即便如此，clone也不需要用户名和密码，所以不会弹出用户名和密码的输入框。
->
+
+由于我的global已经配置了另一个仓库的RSA，而这个仓库我不想添加RSA，所以使用HTTPS方式拉取。不过即便如此，clone也不需要用户名和密码，所以不会弹出用户名和密码的输入框。
+
 >![HTTPS方式拉取远程仓库代码](https://upload-images.jianshu.io/upload_images/3727888-478111770d4133b5.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
->
->等到本地有修改之后，git进行commit
->
+
+等到本地有修改之后，git进行commit
+
 >![提交本地的修改](https://upload-images.jianshu.io/upload_images/3727888-64a8ca71814feef3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
->
->然后push到远程仓库，此时如果是第一次push，会弹出用户名和密码输入框。
->
+
+然后push到远程仓库，此时如果是第一次push，会弹出用户名和密码输入框。
+
 >![第一次push时需要输入用户名和密码](https://upload-images.jianshu.io/upload_images/3727888-84b1641e033ced78.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
->
->与使用git命令不同的是，idea可以记住用户名和密码，不需要每次提交都输入用户名和密码。所以对于IDEA，我倾向于不添加RSA，直接使用用户名和密码。
+
+与使用git命令不同的是，idea可以记住用户名和密码，不需要每次提交都输入用户名和密码。所以对于IDEA，我倾向于不添加RSA，直接使用用户名和密码。
 
 ---
 
