@@ -39,6 +39,7 @@ push代码到远程仓库（本地master提交到远程主机origin）
 
 如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。
 `git push origin :master`等同于`git push origin --delete master`
+
 ---
 
 ## IDEA中Git操作
@@ -73,6 +74,7 @@ push代码到远程仓库（本地master提交到远程主机origin）
 >与使用git命令不同的是，idea可以记住用户名和密码，不需要每次提交都输入用户名和密码。所以对于IDEA，我倾向于不添加RSA，直接使用用户名和密码。
 
 ## GitHub的Hexo博客源码分支管理
+
 >在此记录一下Hexo博客的源码管理（此方法是引用的网络资源经过个人实践验证，但具体链接已无从寻起）。
 >#### 开源码分支
 >把Hexo的源码（一系列markdown文件）备份到Github分支里面，思路就是在Github的博客仓库中创建一个分支，如下图：
@@ -97,8 +99,3 @@ push代码到远程仓库（本地master提交到远程主机origin）
 >`git commit -m "xxx"`
 >`git push origin mdfile:mdfile `
 >然后 `hexo d -g `进行更新静态文件。
-
-
-
-
-
