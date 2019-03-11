@@ -7,47 +7,49 @@ date: 2018-01-07
 - 本机现在global用户名和邮箱是GitHub的仓库的，在某个code.aliyun仓库下局部用户名和邮箱是单独的，虽然局部的是和目录强相关，但是个人感觉毕竟很少切换，便于管理多个RSA。
 
 ---
+
 ## 通用命令
-```git init```
-```git add .```
-```git add xxx(目录名或者完整文件名)```
-```git commit -m "first commit"```
+
+`git init`
+`git add .`
+`git add xxx(目录名或者完整文件名)`
+`git commit -m "first commit"`
 
 HTTPS关联远程仓库（将远程主机命名为origin），使用用户名和密码
-```git remote add origin https://github.com/xxx/xxx.git```
+`git remote add origin https://github.com/xxx/xxx.git`
 
 SSH关联远程仓库（将远程主机命名为origin），使用RSA
-``` git remote add origin git@github.com:xxxx/xxxx.git```
+`git remote add origin git@github.com:xxxx/xxxx.git`
 
 配置局部用户名和邮箱
-``` git config user.name "xxx"```
-```git config user.email "xxx@xxx.com" ```
+`git config user.name "xxx"`
+`git config user.email "xxx@xxx.com" `
 
 列出已经存在的远程主机
-```git remote```
+`git remote`
 
 删除已经存在的关联的远程主机origin
-```git remote rm origin```
+`git remote rm origin`
 
 push命令格式（将本地分支提交到远程主机的远程分支）
-```git push <远程主机名> <本地分支名>:<远程分支名>```
+`git push <远程主机名> <本地分支名>:<远程分支名>`
 
 push代码到远程仓库（本地master提交到远程主机origin）
-```git push origin master```
+`git push origin master`
 
 如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。
-```git push origin :master```等同于```git push origin --delete master```
+`git push origin :master`等同于`git push origin --delete master`
 ---
 
 ## IDEA中Git操作
 对于**“本地新建工程首次推送到远程”**和**“ IDEA拉取远程仓库已有的工程，并修改提交”**两种情况分别记录一种自己喜欢的操作
 #### IDEA创建工程并与远程仓库关联
 >这种情况我倾向于使用命令，比较方便准确。而且还是倾向于使用https，因为后续提交使用IDEA可以记住用户名和密码，免去配置各种RSA。连续命令如下：
-```git init```
-```git add xxxx```
-```git commit -m "first commit"```
-```git remote add origin https://github.com/xxx/xxx.git```
-```git push -u origin master```
+`git init`
+`git add xxxx`
+`git commit -m "first commit"`
+`git remote add origin https://github.com/xxx/xxx.git`
+`git push -u origin master`
 
 #### IDEA拉取远程仓库已有的工程，并修改提交
 >这种情况我喜欢使用IDEA插件的功能，比较无脑方便
@@ -80,21 +82,21 @@ push代码到远程仓库（本地master提交到远程主机origin）
 >其中master是正常的博客文件，mdfile是所有markdown的源文件，每次修改本地的时候先上传源代码到mdfile分支存储，再发布，更换电脑的时候再下载下来源文件即可（以下内容有些年久失修，可能不太靠谱，有待再次实践验证）。
 >
 >#### 分支开好之后，首次进入到博客根目录下：
->```git init```
->```git remote add origin git@github.com:xxxx/xxx.github.io.git```
->```git branch mdfile```(本地开一个mdfile分支)
->```git checkout mdfile```(切换到mdfile分支)
+>`git init`
+>`git remote add origin git@github.com:xxxx/xxx.github.io.git`
+>`git branch mdfile`(本地开一个mdfile分支)
+>`git checkout mdfile`(切换到mdfile分支)
 >#### 然后进入源文件目录(_post)下：
->```git add . ```
->```git commit -m "this is md file"```
->```git push origin mdfile:mdfile```(将本地的mdfile推送到orgin主机的mdfile分支，如果加上-f，则强制上传)
+>`git add . `
+>`git commit -m "this is md file"`
+>`git push origin mdfile:mdfile`(将本地的mdfile推送到orgin主机的mdfile分支，如果加上-f，则强制上传)
 >
 >#### 以后修改/发布博文过程（已验证）
 >进入到源文件目录（_post）下（如果发生过分支切换则需要切换到源码分支操作）
->```git add .``` 或者 ```git add xxx```
->```git commit -m "xxx"```
->```git push origin mdfile:mdfile ```
->然后 ```hexo d -g ```进行更新静态文件。
+>`git add .` 或者 `git add xxx`
+>`git commit -m "xxx"`
+>`git push origin mdfile:mdfile `
+>然后 `hexo d -g `进行更新静态文件。
 
 
 
