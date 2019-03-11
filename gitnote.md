@@ -1,5 +1,5 @@
 ---
-title: 微信java开发系列 一、认证成为开发者
+title: Git使用笔记（持续记录）
 date: 2018-01-07
 ---
 
@@ -29,9 +29,14 @@ SSH关联远程仓库（将远程主机命名为origin），使用RSA
 删除已经存在的关联的远程主机origin
 ```git remote rm origin```
 
-push代码到远程仓库（本地master提交到远程主机origin）
-```git push -u origin master```
+push命令格式（将本地分支提交到远程主机的远程分支）
+```git push <远程主机名> <本地分支名>:<远程分支名>```
 
+push代码到远程仓库（本地master提交到远程主机origin）
+```git push origin master```
+
+如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。
+```git push origin :master```等同于```git push origin --delete master```
 ---
 
 ## IDEA中Git操作
@@ -84,7 +89,7 @@ push代码到远程仓库（本地master提交到远程主机origin）
 >```git commit -m "this is md file"```
 >```git push origin mdfile:mdfile```(将本地的mdfile推送到orgin主机的mdfile分支，如果加上-f，则强制上传)
 >
->#### 以后修改/发布博文过程
+>#### 以后修改/发布博文过程（已验证）
 >进入到源文件目录（_post）下（如果发生过分支切换则需要切换到源码分支操作）
 >```git add .``` 或者 ```git add xxx```
 >```git commit -m "xxx"```
