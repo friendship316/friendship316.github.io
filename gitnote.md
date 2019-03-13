@@ -8,7 +8,7 @@ date: 2018-01-07
 
 ---
 
-## 通用命令
+### 通用命令
 
 `git init`
 `git add .`
@@ -40,9 +40,13 @@ push代码到远程仓库（本地master提交到远程主机origin）
 如果省略本地分支名，则表示删除指定的远程分支，因为这等同于推送一个空的本地分支到远程分支。
 `git push origin :master`等同于`git push origin --delete master`
 
+更新本地仓库的远程地址
+`git remote set-url origin https://github.com/xxx/xxx.git`(使用用户名和密码)
+`git remote set-url origin git@github.com:xxxx/xxxx.git`(使用RSA)
+
 ---
 
-## IDEA中Git操作
+### IDEA中Git操作
 
 对于**“本地新建工程首次推送到远程”**和**“ IDEA拉取远程仓库已有的工程，并修改提交”**两种情况分别记录一种自己喜欢的操作
 
@@ -77,7 +81,7 @@ push代码到远程仓库（本地master提交到远程主机origin）
 
 ---
 
-## GitHub的Hexo博客源码分支管理
+### GitHub的Hexo博客源码分支管理
 
 在此记录一下Hexo博客的源码管理（此方法是引用的网络资源经过个人实践验证，但具体链接已无从寻起）。
 

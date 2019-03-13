@@ -7,7 +7,7 @@ date: 2019-03-14 00:30:47
 
 ---
 
-## Docker常用命令
+### Docker常用命令
 
 列出所有镜像（加上参数`-a` 可以包括中间层镜像，还有`-q`和`--format` 等实用参数）
 `docker image ls`
@@ -33,7 +33,7 @@ date: 2019-03-14 00:30:47
 使用 Dockerfile 创建镜像，这个后面必须跟参数，且须有一个`.`
 `docker build`
 
-## 生成SpringBoot的Web工程的镜像
+### 生成SpringBoot的Web工程的镜像
 
 #### 创建SpringBoot的工程
 首先创建一个简单的SpringBoot工程，工程很简单，功能是访问localhost:8080从而跳转到指定页面。工程中只有一个TestController，这个TestController的默认路径指向index.html页面，这个index.html在resources目录下的templates.home中。static.home可以忽略，其中存的只是index.html的样式文件。
@@ -182,7 +182,7 @@ ENTRYPOINT ["java","-jar","learn-docker.jar"]
 
 未完待续……
 
-## 附Dockerfile常用指令
+### 附Dockerfile常用指令
 
 附Dockerfile的常用指令
 `FROM <image>:<tag>` 指定基础镜像，必须在Dockerfile第一行
@@ -196,7 +196,7 @@ ENTRYPOINT ["java","-jar","learn-docker.jar"]
 `CMD`或`ENTRYPOINT`容器启动时执行的命令，两者有些许区别，可以组合使用
 `ARG <name>[=<default value>]` 设置变量
 
-## IDEADocker插件
+### IDEADocker插件
 未完待续……
 
 ## 参考
