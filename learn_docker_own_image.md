@@ -175,7 +175,8 @@ ENTRYPOINT ["java","-jar","learn-docker.jar"]
 
 ![1552494286526.jpg](https://upload-images.jianshu.io/upload_images/3727888-4cf72c37a3bf8111.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-## 生成正常Web工程的Docker镜像
+### 生成正常Web工程的Docker镜像
+
 经过上面的分析，我们可以分析如果只是正常的web工程，我们的Dockerfile最少需要哪些指令。由于springboot集成了Tomcat，而如果不用springboot，那么我们需要加上Tomcat，理论上来说如果从0构建，那么需要：操作系统+JDK/JRE+Tomcat。
 
 由于JDK/JRE需要操作系统，而Tomcat又需要JDK/JRE，那么如果我们以现有的官方镜像为基础，实际上只需要Tomcat的作为基础镜像即可，当然，如果不使用现有的Tomcat镜像，而是以操作系统镜像为基础，加入JDK/JRE，加入Tomcat，会比使用现有Tomcat作为基础镜像少一层。
@@ -197,6 +198,7 @@ ENTRYPOINT ["java","-jar","learn-docker.jar"]
 `ARG <name>[=<default value>]` 设置变量
 
 ### IDEADocker插件
+
 未完待续……
 
 ## 参考
